@@ -1,0 +1,8 @@
+<h2>Login success... redirecting to main page</h2>
+<script>
+  let accessTokenObj = '{{{accessTokenObj}}}';
+  localStorage.setItem("accessToken", accessTokenObj);
+  setTimeout(() => {
+    window.location.replace("/");
+  }, 1000);
+</script>
