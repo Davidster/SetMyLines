@@ -2,7 +2,6 @@
 
 ### TODO
 
-- make it run on the server forever with systemd
 - write parser for roster
 - figure out how to update roster
 - UX design
