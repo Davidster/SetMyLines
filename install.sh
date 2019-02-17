@@ -18,6 +18,7 @@ echo "" >> /etc/rc.local
 echo "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 chmod 775 /etc/rc.local
+sudo /etc/rc.local
 
 # Copy sources to /opt/ and systemd service files to /etc/systemd/system/
 mkdir /opt/yahoo-fantasy-automation/
