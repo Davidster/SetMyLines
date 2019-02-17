@@ -19,7 +19,7 @@ echo "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-p
 # Copy sources to /opt/ and systemd service files to /etc/systemd/system/
 mkdir /opt/yahoo-fantasy-automation/
 cp -r app /opt/yahoo-fantasy-automation/
-cp systemd/yahoo-fantasy-automation.service /etc/systemd/system/
+cp yahoo-fantasy-automation.service /etc/systemd/system/
 
 # Install Node.js dependencies
 cd /opt/yahoo-fantasy-automation/app
