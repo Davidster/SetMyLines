@@ -1,0 +1,10 @@
+[Unit]
+Description=Yahoo Fantasy Automation Service
+
+[Service]
+ExecStart=/bin/bash /opt/yahoo-fantasy-automation/app/runProd.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
