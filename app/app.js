@@ -6,8 +6,9 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
-var callbackRouter = require('./routes/callback');
-var yahoo = require('./routes/yahoo');
+var loginCallbackRouter = require('./routes/loginCallback');
+var getTeams = require('./routes/getTeams');
+var refreshToken = require('./routes/refreshToken');
 
 let clientID = process.env.CLIENT_ID;
 let clientSecret = process.env.CLIENT_SECRET;
@@ -15,6 +16,20 @@ if(!clientID || !clientSecret) {
   console.log("missing client id or client secret");
   process.exit(1);
 }
+// Set the configuration settings
+const credentials = {
+  client: {
+    id: clientID,
+    secret: clientSecret
+  },
+  auth: {
+    tokenHost: "https://api.login.yahoo.com",
+    authorizePath: "oauth2/request_auth",
+    tokenPath: "oauth2/get_token"
+  }
+};
+// Initialize the OAuth2 Library
+oauth2 = require("simple-oauth2").create(credentials);
 
 var app = express();
 
@@ -30,8 +45,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
-app.use('/callback', callbackRouter);
-app.use('/yahoo', yahoo);
+app.use('/loginCallback', loginCallbackRouter);
+app.use('/getTeams', getTeams);
+app.use('/refreshToken', refreshToken);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
