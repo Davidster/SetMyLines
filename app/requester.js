@@ -12,7 +12,7 @@ module.exports = async (query, authHeader, res) => {
       console.log("Token expired! Telling client to refresh");
       res.status(401).send("token_expired");
     } else {
-      return err;
+      throw err;
     }
   }
 };

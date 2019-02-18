@@ -7,8 +7,9 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var loginCallbackRouter = require('./routes/loginCallback');
-var getTeams = require('./routes/getTeams');
 var refreshToken = require('./routes/refreshToken');
+var getTeams = require('./routes/getTeams');
+var getTeamRoster = require('./routes/getTeamRoster');
 
 let clientID = process.env.CLIENT_ID;
 let clientSecret = process.env.CLIENT_SECRET;
@@ -46,8 +47,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/loginCallback', loginCallbackRouter);
-app.use('/getTeams', getTeams);
 app.use('/refreshToken', refreshToken);
+app.use('/getTeams', getTeams);
+app.use('/getTeamRoster', getTeamRoster);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
