@@ -14,11 +14,12 @@ export NVM_DIR="$HOME/.nvm"
 nvm install v10.15.1 || exit 1
 
 # Reroute port 80 to port 3000
+rm /etc/rc.local
 echo "#!/bin/sh -e" >> /etc/rc.local
 echo "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 chmod 775 /etc/rc.local
-sudo /etc/rc.local
+/etc/rc.local
 
 # Copy sources to /opt/ and systemd service files to /etc/systemd/system/
 mkdir /opt/yahoo-fantasy-automation/
