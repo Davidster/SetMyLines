@@ -5,6 +5,7 @@
 - Figure out how to update roster
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
+- Create docker image for easy deployment/scaling
 
 ## API Investigation
 
