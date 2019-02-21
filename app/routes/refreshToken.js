@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET users listing. */
 router.post("/", async (req, res, next) => {
-  let accessToken = oauth2.accessToken.create(JSON.parse(req.body.accessTokenObj));
+  let accessToken = oauth2.accessToken.create(JSON.parse(req.cookies.accessToken));
   try {
     accessToken = await accessToken.refresh();
   } catch (error) {

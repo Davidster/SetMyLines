@@ -35,6 +35,7 @@ let fetchDailyGameMap = async (date) => {
 };
 
 router.get("/", async (req, res, next) => {
+  let accessToken = JSON.parse(req.cookies.accessToken);
   let date = undefined || moment().format("YYYY-MM-DD");
   let teamKey = req.query.teamKey;
   let leagueKey = teamKey.split(".").slice(0,3).join(".");
@@ -45,7 +46,7 @@ router.get("/", async (req, res, next) => {
   let statIDMap = {}, dailyGameMap = {}, playerPositions = {}, allPlayerInfo = [];
   try {
     dailyGameMap = await fetchDailyGameMap(date);
-    let $ = await requester(gameSettingsQuery, req.headers.authorization, res);
+    let $ = await requester(gameSettingsQuery, accessToken, res);
     if($) {
       // map stat_id to name, display_name, enabled, position_type, value
       let $statModifiers = $("stat_modifiers stat");
@@ -60,7 +61,7 @@ router.get("/", async (req, res, next) => {
     } else {
       return;
     }
-    $ = await requester(leagueSettingsQuery, req.headers.authorization, res);
+    $ = await requester(leagueSettingsQuery, accessToken, res);
     if($) {
       // map stat_id to name, display_name, enabled, position_type, value
       let $statModifiers = $("stat_modifiers stat");
@@ -82,7 +83,7 @@ router.get("/", async (req, res, next) => {
     } else {
       return;
     }
-    $ = await requester(teamRosterQuery, req.headers.authorization, res);
+    $ = await requester(teamRosterQuery, accessToken, res);
     if($) {
       $("player").each((i, player) =>{
         let $player = $(player);
@@ -100,7 +101,7 @@ router.get("/", async (req, res, next) => {
     for(let batch = 0; batch < batches; batch++) {
       let playerBatch = playerKeys.slice(batch * playersPerBatch, (batch + 1) * playersPerBatch);
       let playersStatsQuery = `players;player_keys=${playerBatch.join(",")}/stats`;
-      $ = await requester(playersStatsQuery, req.headers.authorization, res);
+      $ = await requester(playersStatsQuery, accessToken, res);
       if($) {
         $("player").each((i, player) => {
           let $player = $(player);

@@ -1,13 +1,15 @@
-let accessToken;
-
 let setAccessToken = (accessTokenObj) => {
-  localStorage.setItem("accessToken", accessTokenObj);
-  accessToken = JSON.parse(accessTokenObj);
-  $.ajaxSetup({
-    headers: {
-      Authorization: `Bearer ${accessToken.access_token}`
-    }
+  document.cookie = `accessToken=${accessTokenObj}`;
+};
+
+let getCookieMap = () => {
+  let rawCookies = document.cookie.split(";");
+  let cookieMap = {};
+  rawCookies.forEach(rawCookie => {
+  	let asArray = rawCookie.trim().split("=");
+  	cookieMap[asArray[0]] = asArray[1];
   });
+  return cookieMap;
 };
 
 let refreshableRequest = (options) => {
@@ -20,8 +22,7 @@ let refreshableRequest = (options) => {
         console.log("Token expired. Refreshing");
         $.ajax({
           type: "POST",
-          url: "/refreshToken",
-          data: { accessTokenObj: JSON.stringify(accessToken) }
+          url: "/refreshToken"
         }).done((accessTokenObj) => {
           setAccessToken(accessTokenObj);
           $.ajax(options).done(success);
@@ -62,7 +63,8 @@ let buildTeamDivs = (teams) => {
 };
 
 $(async () => {
-  let accessTokenObj = localStorage.getItem("accessToken");
+  let cookieMap = getCookieMap();
+  let accessTokenObj = cookieMap.accessToken;
   if(!accessTokenObj && window.location.hostname !== "localhost") {
     return window.location.replace("/login");
   }
@@ -71,5 +73,4 @@ $(async () => {
   let teams = await getTeams();
   console.log("/getTeams API call:", teams);
   buildTeamDivs(teams);
-
 });

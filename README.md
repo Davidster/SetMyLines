@@ -4,7 +4,8 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 
 ## TODO
 
-- FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))
+- ~FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))~
+- Verify JWT sent by client on each request. Also, check if token is expired and auto-refresh instead of exposing a /refreshToken API
 - Figure out how to update roster
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
