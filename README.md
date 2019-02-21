@@ -1,7 +1,10 @@
 # yahoo-fantasy-automation
 
+Catch me livestreaming the development of this project on [Twitch](https://www.twitch.tv/dhuckz).
+
 ## TODO
 
+- FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))
 - Figure out how to update roster
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
