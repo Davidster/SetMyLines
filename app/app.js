@@ -6,7 +6,7 @@ var logger = require("morgan");
 var dotenv = require("dotenv");
 dotenv.config();
 var passport = require("passport");
-var YahooStrategy = require("passport-yahoo-oauth").Strategy;
+var YahooStrategy = require("passport-yahoo-oauth2").Strategy;
 
 var indexRouter = require("./routes/index");
 var authRouter = require("./routes/auth");

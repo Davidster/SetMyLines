@@ -21,6 +21,7 @@
     "morgan": "~1.9.0",
     "passport": "^0.4.0",
     "passport-yahoo-oauth": "^0.2.0",
+    "passport-yahoo-oauth2": "^0.2.6",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "simple-oauth2": "^2.2.1"
