@@ -62,14 +62,15 @@ let buildTeamDivs = (teams) => {
 };
 
 $(async () => {
-  let accessTokenObj = localStorage.getItem("accessToken");
-  if(!accessTokenObj && window.location.hostname !== "localhost") {
-    return window.location.replace("/login");
-  }
-  setAccessToken(accessTokenObj);
-
-  let teams = await getTeams();
-  console.log("/getTeams API call:", teams);
-  buildTeamDivs(teams);
+  // let accessTokenObj = localStorage.getItem("accessToken");
+  // if(!accessTokenObj && window.location.hostname !== "localhost") {
+  //   // return window.location.replace("/login");
+  //   return console.log("no auth");
+  // }
+  // setAccessToken(accessTokenObj);
+  //
+  // let teams = await getTeams();
+  // console.log("/getTeams API call:", teams);
+  // buildTeamDivs(teams);
 
 });

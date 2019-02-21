@@ -5,7 +5,7 @@ var router = express.Router();
 router.get('/', async (req, res, next) => {
   const tokenConfig = {
     code: req.query.code,
-    redirect_uri: "http://ec2-52-87-166-236.compute-1.amazonaws.com/loginCallback"
+    redirect_uri: "http://localhost:3000/loginCallback"
   };
   try {
     const result = await oauth2.authorizationCode.getToken(tokenConfig)
