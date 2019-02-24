@@ -12,33 +12,23 @@ let getCookieMap = () => {
   return cookieMap;
 };
 
-let refreshableRequest = (options) => {
+let apiRequest = (options) => {
   return new Promise((resolve, reject) => {
-    let success = (data) => {
+    $.ajax(options).done((data) => {
       resolve(JSON.parse(data));
-    }
-    $.ajax(options).done(success).catch((err) => {
-      if(err.status === 401 && err.responseText === "token_expired") {
-        console.log("Token expired. Refreshing");
-        $.ajax({
-          type: "POST",
-          url: "/refreshToken"
-        }).done((accessTokenObj) => {
-          setAccessToken(accessTokenObj);
-          $.ajax(options).done(success);
-        });
-      }
+    }).catch((err) => {
       console.log("request error", err);
+      reject(err);
     });
   });
 };
 
-let getTeams = async () => refreshableRequest({
+let getTeams = async () => apiRequest({
   type: "GET",
   url: "/getTeams"
 });
 
-let getTeamRoster = async (teamKey) => refreshableRequest({
+let getTeamRoster = async (teamKey) => apiRequest({
   type: "GET",
   url: `/getTeamRoster?teamKey=${teamKey}`
 });

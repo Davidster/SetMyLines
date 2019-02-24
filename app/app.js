@@ -9,7 +9,6 @@ dotenv.config();
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/login');
 var loginCallbackRouter = require('./routes/loginCallback');
-var refreshToken = require('./routes/refreshToken');
 var getTeams = require('./routes/getTeams');
 var getTeamRoster = require('./routes/getTeamRoster');
 
@@ -49,7 +48,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/loginCallback', loginCallbackRouter);
-app.use('/refreshToken', refreshToken);
 app.use('/getTeams', getTeams);
 app.use('/getTeamRoster', getTeamRoster);
 

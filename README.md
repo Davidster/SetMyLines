@@ -5,7 +5,7 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 ## TODO
 
 - ~FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))~
-- Verify JWT sent by client on each request. Also, check if token is expired and auto-refresh instead of exposing a /refreshToken API
+- ~Verify JWT sent by client on each request. Also, check if token is expired and auto-refresh instead of exposing a /refreshToken API~
 - Fix roster download script so it does all queries in parallel instead of 1 at a time
 - Figure out how to update roster
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
