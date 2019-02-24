@@ -9,6 +9,7 @@ router.get('/', async (req, res, next) => {
   };
   try {
     const result = await oauth2.authorizationCode.getToken(tokenConfig)
+    console.log(result);
     const accessToken = oauth2.accessToken.create(result);
     const accessTokenString = JSON.stringify(accessToken.token);
     res.render("loginRedirect", { accessTokenObj: accessTokenString });
