@@ -11,26 +11,23 @@ const EXPIRATION_WINDOW_IN_SECONDS = 300;
   verifies the signature of the idToken and
   return the contained user attributes
   TODO: read max-age from jwk and cache the value instead of requesting every time
+
+  If the token happens to be both expired and holding an invalid signature,
+  then the invalid signature error will take precedence. Here, we choose to ignore
+  the expiry of the id token and instead check the expiry of the access token elsewhere.
 */
 let verifyIDToken = async (idToken) => {
-  let joseHeader = JSON.parse(Buffer.from(idToken.split(".")[0], "base64").toString());
+  let splitToken = idToken.split(".");
+  let joseHeader = JSON.parse(Buffer.from(splitToken[0], "base64").toString());
+  let payload = JSON.parse(Buffer.from(splitToken[1], "base64").toString());
   let jwksUrl = await rp(DISCOVERY_DOCUMENT_URL).then(res=>JSON.parse(res).jwks_uri);
   let jwk = await rp(jwksUrl).then(res=>JSON.parse(res).keys.filter(jwk=>jwk.kid===joseHeader.kid)[0]);
   return new Promise((resolve, reject) => {
     jwt.verify(idToken, jwkToPem(jwk), (err, decoded) => {
-      if(err) {
-        /*
-          If the token happens to be both expired and holding an invalid signature,
-          then the invalid signature error will take precedence. Here, we choose to ignore
-          the expiry of the id token and instead check the expiry of the access token elsewhere.
-        */
-        if(err.name === "TokenExpiredError") {
-          console.log("ID Token is expired but signature is valid... ignoring error.");
-        } else {
-          return reject(err);
-        }
+      if(err && err.name !== "TokenExpiredError") {
+        return reject(err);
       }
-      resolve(decoded);
+      resolve(payload);
     });
   });
 };
@@ -41,7 +38,7 @@ module.exports = async (query, accessToken, res) => {
   try {
     let userInfo = await verifyIDToken(accessToken.id_token);
     console.log(`Making request to /${query.split(";")[0]} on behalf of ${userInfo.sub}`);
-    console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
+    // console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
   } catch (err) {
     console.log("Error validating user id_token");
     throw err;
