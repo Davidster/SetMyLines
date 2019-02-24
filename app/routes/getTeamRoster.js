@@ -44,9 +44,14 @@ router.get("/", async (req, res, next) => {
   let gameSettingsQuery = `game/${gameKey}/stat_categories`;
   let teamRosterQuery = `team/${teamKey}/roster;date=${date}`;
   let statIDMap = {}, dailyGameMap = {}, playerPositions = {}, allPlayerInfo = [];
+  console.time("total");
   try {
+    console.time("fetchDailyGameMap");
     dailyGameMap = await fetchDailyGameMap(date);
+    console.timeEnd("fetchDailyGameMap");
+    console.time("gameSettingsQuery");
     let $ = await requester(gameSettingsQuery, accessToken, res);
+    console.timeEnd("gameSettingsQuery");
     if($) {
       // map stat_id to name, display_name, enabled, position_type, value
       let $statModifiers = $("stat_modifiers stat");
@@ -61,7 +66,9 @@ router.get("/", async (req, res, next) => {
     } else {
       return;
     }
+    console.time("leagueSettingsQuery");
     $ = await requester(leagueSettingsQuery, accessToken, res);
+    console.timeEnd("leagueSettingsQuery");
     if($) {
       // map stat_id to name, display_name, enabled, position_type, value
       let $statModifiers = $("stat_modifiers stat");
@@ -83,7 +90,9 @@ router.get("/", async (req, res, next) => {
     } else {
       return;
     }
+    console.time("teamRosterQuery");
     $ = await requester(teamRosterQuery, accessToken, res);
+    console.timeEnd("teamRosterQuery");
     if($) {
       $("player").each((i, player) =>{
         let $player = $(player);
@@ -101,7 +110,9 @@ router.get("/", async (req, res, next) => {
     for(let batch = 0; batch < batches; batch++) {
       let playerBatch = playerKeys.slice(batch * playersPerBatch, (batch + 1) * playersPerBatch);
       let playersStatsQuery = `players;player_keys=${playerBatch.join(",")}/stats`;
+      console.time("playersStatsQuery");
       $ = await requester(playersStatsQuery, accessToken, res);
+      console.timeEnd("playersStatsQuery");
       if($) {
         $("player").each((i, player) => {
           let $player = $(player);
@@ -149,6 +160,7 @@ router.get("/", async (req, res, next) => {
     console.log("Unknown request error:", err);
     return res.status(500).send();
   }
+  console.timeEnd("total");
   res.send(JSON.stringify(allPlayerInfo));
 });
 
