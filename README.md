@@ -46,3 +46,50 @@ https://fantasysports.yahooapis.com/fantasy/v2/team/386.l.119688.t.5/roster
 ### Edit roster for current day
 PUT http://fantasysports.yahooapis.com/fantasy/v2/team/386.l.119688.t.5/roster
 see xml data content here: https://developer.yahoo.com/fantasysports/guide/roster-resource.html#roster-resource-PUT
+
+Example:
+
+```
+curl -X PUT https://fantasysports.yahooapis.com/fantasy/v2/team/386.l.119688.t.5/roster
+-H "Authorization: Bearer xxx"
+-H "Content-Type: application/xml"
+-d "
+<?xml version="1.0"?>
+<fantasy_content>
+  <roster>
+    <coverage_type>date</coverage_type>
+    <date>2019-02-25</date>
+    <players>
+      <player>
+        <player_key>386.p.7109</player_key>
+        <position>C</position>
+      </player>
+      <player>
+        <player_key>386.p.4962</player_key>
+        <position>BN</position>
+      </player>
+      <player>
+        <player_key>386.p.5991</player_key>
+        <position>LW</position>
+      </player>
+      <player>
+        <player_key>386.p.5405</player_key>
+        <position>BN</position>
+      </player>
+    </players>
+  </roster>
+</fantasy_content>
+"
+```
+
+Response:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<fantasy_content xml:lang="en-US" yahoo:uri="http://fantasysports.yahooapis.com/fantasy/v2/team/386.l.119688.t.5/roster" xmlns:yahoo="http://www.yahooapis.com/v1/base.rng" xmlns="http://fantasysports.yahooapis.com/fantasy/v2/base.rng">
+    <confirmation>
+        <status>success</status>
+    </confirmation>
+</fantasy_content>
+<!-- fanos299.sports.bf1.yahoo.com Mon Feb 25 07:33:52 UTC 2019 -->
+```
