@@ -9,8 +9,8 @@ const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
 let processDailyGames = (gmDoc) => {
   let dailyGameMap = {};
   gmDoc.dates[0].games.forEach(game => {
-    let homeTeam = game.teams.home.team.name;
-    let awayTeam = game.teams.away.team.name;
+    let homeTeam = game.teams.home.team.name.replace("é", "e"); // TODO: Make sure all 30 yahoo fantasy (nhl) team names correspond to their respective nhl-api counterparts (OMEGALUL)
+    let awayTeam = game.teams.away.team.name.replace("é", "e");
     dailyGameMap[homeTeam] = {
       gameDate: game.gameDate,
       opponent: awayTeam
