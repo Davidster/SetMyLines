@@ -5,19 +5,29 @@ const requester = require("../requester");
 const moment = require("moment");
 
 const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
+const NHL_TEAMS_URL = "https://statsapi.web.nhl.com/api/v1/teams";
 
-let processDailyGames = (gmDoc) => {
+let processDailyGames = (gmDoc, teamDoc) => {
   let dailyGameMap = {};
   gmDoc.dates[0].games.forEach(game => {
-    let homeTeam = game.teams.home.team.name;
-    let awayTeam = game.teams.away.team.name;
-    dailyGameMap[homeTeam] = {
+    let homeTeamAbbr, awayTeamAbbr;
+    teamDoc.teams.forEach(team => {
+      if(team.name === game.teams.home.team.name) {
+        homeTeamAbbr = team.abbreviation;
+      }
+      if(team.name === game.teams.away.team.name) {
+        awayTeamAbbr = team.abbreviation;
+      }
+    });
+    console.log(homeTeamAbbr);
+    console.log(awayTeamAbbr);
+    dailyGameMap[homeTeamAbbr] = {
       gameDate: game.gameDate,
-      opponent: awayTeam
+      opponent: awayTeamAbbr
     };
-    dailyGameMap[awayTeam] = {
+    dailyGameMap[awayTeamAbbr] = {
       gameDate: game.gameDate,
-      opponent: homeTeam
+      opponent: homeTeamAbbr
     };
   });
   return dailyGameMap;
@@ -69,15 +79,19 @@ let processPlayerStats = ($psDocs, playerPositions, statIDMap, dailyGameMap) => 
   let allPlayerInfo = [];
 
   // parse player info and stats
+  console.log();
   $psDocs.forEach($psDoc => {
+    // console.log($psDoc.html());
     $psDoc("player").each((i, player) => {
       let $player = $psDoc(player);
       let playerKey = $player.find("player_key").first().text();
+      console.log($player.find("editorial_team_abbr").first().text().toUpperCase());
       allPlayerInfo.push({
         playerKey: playerKey,
         playerSelectedPosition: playerPositions[playerKey],
         playerName: $player.find("name > full").first().text(),
         playerTeam: $player.find("editorial_team_full_name").first().text(),
+        playerTeamShort: $player.find("editorial_team_abbr").first().text().toUpperCase(),
         playerStatus: $player.find("status").first().text(),
         playerImageUrl: $player.find("image_url").first().text(),
         playerStartingStatus: $player.find("starting_status > is_starting").first().text(),
@@ -107,7 +121,7 @@ let processPlayerStats = ($psDocs, playerPositions, statIDMap, dailyGameMap) => 
       ...playerInfo,
       totalFps: totalFps,
       averageFps: averageFps,
-      todaysGame: dailyGameMap[playerInfo.playerTeam]
+      todaysGame: dailyGameMap[playerInfo.playerTeamShort]
     };
   });
 
@@ -144,6 +158,7 @@ router.get("/", async (req, res, next) => {
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
+  let nhlTeamsReq = { url: NHL_TEAMS_URL };
   let teamKey = req.query.teamKey;
   let teamRosterQuery = `team/${teamKey}/roster;date=${date}`;
   let leagueKey = teamKey.split(".").slice(0,3).join(".");
@@ -160,20 +175,20 @@ router.get("/", async (req, res, next) => {
         return Promise.all(batchPlayerStatsRequests(playerPositions, accessToken, res));
       }),
       rp(dailyScheduleReq),
+      rp(nhlTeamsReq),
       requester(gameSettingsQuery, accessToken, res),
       requester(leagueSettingsQuery, accessToken, res)
     ]);
 
     // process query results
-    let dailyGameMap = processDailyGames(JSON.parse(requests[1]));
-    let statIDMap = processGameSettings(requests[2]);
-    processLeagueSettings(requests[3], statIDMap);
+    let dailyGameMap = processDailyGames(JSON.parse(requests[1]), JSON.parse(requests[2]));
+    let statIDMap = processGameSettings(requests[3]);
+    processLeagueSettings(requests[4], statIDMap);
     allPlayerInfo = processPlayerStats(requests[0], playerPositions, statIDMap, dailyGameMap);
   } catch (err) {
     console.log("Error getting team roster:", err.message);
     return res.status(500).send();
   }
-
   // return results to client
   res.send(JSON.stringify(allPlayerInfo));
 });

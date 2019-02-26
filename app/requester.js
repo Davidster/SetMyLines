@@ -64,6 +64,7 @@ module.exports = async (query, accessToken, res) => {
     }
   }
 
+console.log(accessToken.access_token);
   // make signed request to Yahoo
   try {
     let response = await rp({ url: new URL(query, API_BASE_URL).href, headers: { authorization: `Bearer ${accessToken.access_token}` } });
