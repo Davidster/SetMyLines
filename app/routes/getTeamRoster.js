@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const rp = require("request-promise");
-const requester = require("../requester");
+const { requester, refreshTokenIfNeeded } = require("../requester");
 const moment = require("moment");
 
 const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
@@ -157,6 +157,7 @@ router.get("/", async (req, res, next) => {
   try {
     // perform yahoo queries
     let playerInfoSub = {};
+    accessToken = await refreshTokenIfNeeded(accessToken, res);
     let requests = await Promise.all([
       requester(teamRosterQuery, accessToken, res).then($trDoc => {
         playerInfoSub = processTeamRoster($trDoc);

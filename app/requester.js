@@ -8,9 +8,10 @@ const DISCOVERY_DOCUMENT_URL = "https://login.yahoo.com/.well-known/openid-confi
 const EXPIRATION_WINDOW_IN_SECONDS = 300;
 
 /*
-  verifies the signature of the idToken and
-  return the contained user attributes
-  TODO: read max-age from jwk and cache the value instead of requesting every time
+  Verifies the signature of the idToken and
+  returns the contained user attributes
+  TODO: read max-age from jwk+discovery doc and
+  cache the value instead of requesting every time
 
   If the token happens to be both expired and holding an invalid signature,
   then the invalid signature error will take precedence. Here, we choose to ignore
@@ -23,7 +24,7 @@ let verifyIDToken = async (idToken) => {
   let jwksUrl = await rp(DISCOVERY_DOCUMENT_URL).then(res=>JSON.parse(res).jwks_uri);
   let jwk = await rp(jwksUrl).then(res=>JSON.parse(res).keys.filter(jwk=>jwk.kid===joseHeader.kid)[0]);
   return new Promise((resolve, reject) => {
-    jwt.verify(idToken, jwkToPem(jwk), (err, decoded) => {
+    jwt.verify(idToken, jwkToPem(jwk), err => {
       if(err && err.name !== "TokenExpiredError") {
         return reject(err);
       }
@@ -32,7 +33,25 @@ let verifyIDToken = async (idToken) => {
   });
 };
 
-module.exports = async (query, accessToken, res) => {
+let refreshTokenIfNeeded = async (accessToken, res) => {
+  // refresh the token if needed
+  const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
+  const expirationWindowStart = expirationTimeInSeconds - EXPIRATION_WINDOW_IN_SECONDS;
+  const nowInSeconds = (new Date()).getTime() / 1000;
+  const shouldRefresh = nowInSeconds >= expirationWindowStart;
+  if (shouldRefresh) {
+    console.log("Token expired. Refreshing");
+    let newAccessToken = await oauth2.accessToken.create(accessToken).refresh();
+    accessToken = {
+      ...newAccessToken.token,
+      id_token: accessToken.id_token
+    };
+    res.cookie("accessToken", JSON.stringify(accessToken));
+  }
+  return accessToken;
+};
+
+module.exports.requester = async (query, accessToken, res) => {
 
   // verify the user's id
   try {
@@ -44,24 +63,11 @@ module.exports = async (query, accessToken, res) => {
     throw err;
   }
 
-  // refresh the token if needed
-  const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
-  const expirationWindowStart = expirationTimeInSeconds - EXPIRATION_WINDOW_IN_SECONDS;
-  const nowInSeconds = (new Date()).getTime() / 1000;
-  const shouldRefresh = nowInSeconds >= expirationWindowStart;
-  if (shouldRefresh) {
-    try {
-      console.log("Token expired. Refreshing");
-      let newAccessToken = await oauth2.accessToken.create(accessToken).refresh();
-      accessToken = {
-        ...newAccessToken.token,
-        id_token: accessToken.id_token
-      };
-      res.cookie("accessToken", JSON.stringify(accessToken));
-    } catch (err) {
-      console.log("Error refreshing access token");
-      throw err;
-    }
+  try {
+    accessToken = await refreshTokenIfNeeded(accessToken, res);
+  } catch (err) {
+    console.log("Error refreshing access token");
+    throw err;
   }
 
   // make signed request to Yahoo
@@ -73,3 +79,4 @@ module.exports = async (query, accessToken, res) => {
     throw err;
   }
 };
+module.exports.refreshTokenIfNeeded = refreshTokenIfNeeded;

@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const requester = require("../requester");
+const { requester, refreshTokenIfNeeded } = require("../requester");
 
 // users;use_login=1/games;is_available=1;game_keys=nhl/leagues/teams
 const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
