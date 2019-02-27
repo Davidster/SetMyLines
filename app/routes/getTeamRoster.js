@@ -9,7 +9,8 @@ const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
 let processDailyGames = (gmDoc) => {
   let dailyGameMap = {};
   gmDoc.dates[0].games.forEach(game => {
-    let homeTeam = game.teams.home.team.name.replace("é", "e"); // TODO: Make sure all 30 yahoo fantasy (nhl) team names correspond to their respective nhl-api counterparts (OMEGALUL)
+    // all teams have the same non-abbreviated name across nhl and yahoo except the montreal canadiens... see branch yahooVsNhlTeamNames
+    let homeTeam = game.teams.home.team.name.replace("é", "e");
     let awayTeam = game.teams.away.team.name.replace("é", "e");
     dailyGameMap[homeTeam] = {
       gameDate: game.gameDate,
@@ -29,9 +30,9 @@ let processGameSettings = ($gsDoc) => {
   $gsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $gsDoc(statCategory);
     statIDMap[$statCategory.find("stat_id").first().text()] = {
-      statName: $statCategory.find("name").first().text(),
-      statDisplayName: $statCategory.find("display_name").first().text(),
-      statPositionTypes: $statCategory.find("position_types > position_type").map((i,position)=>$gsDoc(position).text()).get()
+      name: $statCategory.find("name").text(),
+      displayName: $statCategory.find("display_name").text(),
+      posTypes: $statCategory.find("position_types > position_type").map((i,position)=>$gsDoc(position).text()).get()
     };
   });
   return statIDMap;
@@ -41,58 +42,61 @@ let processLeagueSettings = ($lsDoc, statIDMap) => {
   let $statModifiers = $lsDoc("stat_modifiers stat");
   $lsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $lsDoc(statCategory);
-    let statID = $statCategory.find("stat_id").first().text();
+    let statID = $statCategory.find("stat_id").text();
     $statModifiers.each((i, statModifier) => {
       let $statModifier = $lsDoc(statModifier);
-      if(statID === $statModifier.find("stat_id").first().text()) {
-        statValue = $statModifier.find("value").first().text();
+      if(statID === $statModifier.find("stat_id").text()) {
+        statValue = $statModifier.find("value").text();
       }
     });
     statIDMap[statID] = {
       ...statIDMap[statID],
-      statEnabled: $statCategory.find("enabled").first().text(),
-      statValue: statValue
+      enabled: $statCategory.find("enabled").text(),
+      fanPointsPerUnit: statValue
     };
   });
 };
 
 let processTeamRoster = ($trDoc) => {
-  let playerPositions = {};
+  let playerInfoSub = {};
   $trDoc("player").each((i, player) =>{
     let $player = $trDoc(player);
-    playerPositions[$player.find("player_key").first().text()] = $player.find("selected_position position").first().text();
+    playerInfoSub[$player.find("player_key").text()] = {
+      selectedPos: $player.find("selected_position position").text(),
+      startingStatus: $player.find("starting_status > is_starting").text() || undefined
+    };
   });
-  return playerPositions;
+  return playerInfoSub;
 };
 
-let processPlayerStats = ($psDocs, playerPositions, statIDMap, dailyGameMap) => {
+let processPlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameMap) => {
   let allPlayerInfo = [];
 
   // parse player info and stats
   $psDocs.forEach($psDoc => {
     $psDoc("player").each((i, player) => {
+
       let $player = $psDoc(player);
-      let playerKey = $player.find("player_key").first().text();
+      let playerKey = $player.find("player_key").text();
       allPlayerInfo.push({
-        playerKey: playerKey,
-        playerSelectedPosition: playerPositions[playerKey],
-        playerName: $player.find("name > full").first().text(),
-        playerTeam: $player.find("editorial_team_full_name").first().text(),
-        playerStatus: $player.find("status").first().text(),
-        playerImageUrl: $player.find("image_url").first().text(),
-        playerStartingStatus: $player.find("starting_status > is_starting").first().text(),
-        playerEligiblePositions: $player.find("eligible_positions > position").map((i,position)=>$psDoc(position).text()).get(),
-        playerStats: $player.find("stats > stat").map((i, stat) => {
+        ...playerInfoSub[playerKey],
+        key: playerKey,
+        name: $player.find("name > full").text(),
+        team: $player.find("editorial_team_full_name").text(),
+        status: $player.find("status").text() || undefined,
+        imageUrl: $player.find("image_url").text() || undefined,
+        eligiblePosList: $player.find("eligible_positions > position").map((i,position)=>$psDoc(position).text()).get(),
+        stats: $player.find("stats > stat").map((i, stat) => {
           let $stat = $psDoc(stat);
-          let statID = $stat.find("stat_id").first().text();
+          let statID = $stat.find("stat_id").text();
           return {
-            statID: statID,
-            statName: statIDMap[statID].statName,
-            statDisplayName: statIDMap[statID].statDisplayName,
-            statEnabled: statIDMap[statID].statEnabled,
-            statPositionTypes: statIDMap[statID].statPositionTypes,
-            statFPValue: statIDMap[statID].statValue,
-            statCountValue: $stat.find("value").first().text()
+            id: statID,
+            name: statIDMap[statID].name,
+            displayName: statIDMap[statID].displayName,
+            enabled: statIDMap[statID].enabled,
+            posTypes: statIDMap[statID].posTypes,
+            fanPointsPerUnit: statIDMap[statID].fanPointsPerUnit,
+            count: $stat.find("value").text()
           };
         }).get()
       });
@@ -102,21 +106,20 @@ let processPlayerStats = ($psDocs, playerPositions, statIDMap, dailyGameMap) => 
   // compute fan point values from stats
   allPlayerInfo = allPlayerInfo.map(playerInfo => {
     let totalFps = calculateTotalFps(playerInfo);
-    let averageFps = totalFps / playerInfo.playerStats.filter(stat=>stat.statDisplayName==="GP")[0].statCountValue;
+    let averageFps = totalFps / playerInfo.stats.filter(stat=>stat.displayName==="GP")[0].count;
     return {
       ...playerInfo,
-      totalFps: totalFps,
-      averageFps: averageFps,
-      todaysGame: dailyGameMap[playerInfo.playerTeam]
+      totalFanPoints: totalFps,
+      averageFanPoints: averageFps,
+      todaysGame: dailyGameMap[playerInfo.team]
     };
   });
 
   return allPlayerInfo;
 };
 
-let batchPlayerStatsRequests = (playerPositions, accessToken, res) => {
+let batchPlayerStatsRequests = (playerKeys, accessToken, res) => {
   // Yahoo seems to only allow 25 players per request. put max at 20 to be safe
-  let playerKeys = Object.keys(playerPositions);
   let playersPerBatch = 20;
   let batches = Math.ceil(playerKeys.length / playersPerBatch);
   let batchPromises = [];
@@ -129,9 +132,9 @@ let batchPlayerStatsRequests = (playerPositions, accessToken, res) => {
 };
 
 let calculateTotalFps = (playerInfo) => {
-  return playerInfo.playerStats.reduce((acc, stat) => {
-    if(stat.statEnabled === "1") {
-      return acc + stat.statCountValue * stat.statFPValue;
+  return playerInfo.stats.reduce((acc, stat) => {
+    if(stat.enabled === "1") {
+      return acc + stat.count * stat.fanPointsPerUnit;
     }
     return acc;
   }, 0);
@@ -140,7 +143,7 @@ let calculateTotalFps = (playerInfo) => {
 router.get("/", async (req, res, next) => {
   // parse request
   let accessToken = JSON.parse(req.cookies.accessToken);
-  let date = "2019-02-25" || moment().format("YYYY-MM-DD");
+  let date = undefined || moment().format("YYYY-MM-DD");
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
@@ -153,11 +156,11 @@ router.get("/", async (req, res, next) => {
 
   try {
     // perform yahoo queries
-    let playerPositions = {};
+    let playerInfoSub = {};
     let requests = await Promise.all([
       requester(teamRosterQuery, accessToken, res).then($trDoc => {
-        playerPositions = processTeamRoster($trDoc);
-        return Promise.all(batchPlayerStatsRequests(playerPositions, accessToken, res));
+        playerInfoSub = processTeamRoster($trDoc);
+        return Promise.all(batchPlayerStatsRequests(Object.keys(playerInfoSub), accessToken, res));
       }),
       rp(dailyScheduleReq),
       requester(gameSettingsQuery, accessToken, res),
@@ -168,9 +171,10 @@ router.get("/", async (req, res, next) => {
     let dailyGameMap = processDailyGames(JSON.parse(requests[1]));
     let statIDMap = processGameSettings(requests[2]);
     processLeagueSettings(requests[3], statIDMap);
-    allPlayerInfo = processPlayerStats(requests[0], playerPositions, statIDMap, dailyGameMap);
+    allPlayerInfo = processPlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap);
+
   } catch (err) {
-    console.log("Error getting team roster:", err.message);
+    console.log("Error getting team roster:", err);
     return res.status(500).send();
   }
 

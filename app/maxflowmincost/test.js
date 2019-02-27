@@ -37,14 +37,14 @@ let maxFlowMinCost = (players, positions, positionCapacityMap, outputBins) => {
   let allPlayersRaw = await fs.readFile("playerInfo.json", "utf-8").then(fileString=>JSON.parse(fileString));
   console.timeEnd("read");
   console.time("compute");
-  let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.playerName] = player; return acc; }, {});
+  let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
   let allPlayers = allPlayersRaw.map(player => ({
-    name: player.playerName,
-    currentPosition: player.playerSelectedPosition,
-    posList: player.playerEligiblePositions,
-    value: player.averageFps,
+    name: player.name,
+    currentPosition: player.selectedPos,
+    posList: player.eligiblePosList,
+    value: player.averageFanPoints,
     hasGameToday: !!player.todaysGame,
-    unhealthy: !!player.playerStatus
+    unhealthy: !!player.status
   })).sort((a,b)=>(b.value-a.value));
   let positionCapacityMap = allPlayers.reduce((acc, { currentPosition }) => {
     let pos = currentPosition;
