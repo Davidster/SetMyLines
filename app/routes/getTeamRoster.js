@@ -140,7 +140,7 @@ let calculateTotalFps = (playerInfo) => {
 router.get("/", async (req, res, next) => {
   // parse request
   let accessToken = JSON.parse(req.cookies.accessToken);
-  let date = undefined || moment().format("YYYY-MM-DD");
+  let date = "2019-02-25" || moment().format("YYYY-MM-DD");
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
