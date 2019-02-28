@@ -1,42 +1,56 @@
+
 const fs = require("fs-extra");
 const FlowNetwork = require("flownetwork");
+const { exec } = require("child_process");
+
+const PYTHON_COMMAND = "python maxFlowMinCost.py";
 
 /*
   TODO: make sure goalies who are officially starting are prioritized over those who are not. this can be
         easily done by marking the goalie as unhealthy if they are not starting
-  TODO: filter away players that are placed on the IR position (not to be confused with players who have IR status)
 */
 
-/*
-  Use maximum flow, minimum cost algorithm with the help of
-  the flownetwork package. See https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value.
-
-  outputBins param will be mutated
-*/
-let maxFlowMinCost = (players, positions, positionCapacityMap, outputBins) => {
-  let fn = new FlowNetwork();
-  positions.forEach((pos) => {
-    fn.addEdge(pos, "t", positionCapacityMap[pos], 0);
-  });
-  players.forEach(player => {
-    fn.addEdge("s", player.name, 1, -player.value);
-    player.posList.forEach((pos) => {
-      fn.addEdge(player.name, pos, 1, 0);
+let runCommand = (command) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        return reject(stdout || error);
+      }
+      resolve(stdout);
     });
-  });
-  fn.maxFlowMinCost("s", "t");
-  players.forEach(player => {
-    // retrieve the assigned position from the maxFlowMinCost solution graph
-    let assignedPosition = player.posList.filter(pos=>fn.getEdge(player.name,pos).flow===1)[0] || "BN";
-    outputBins[assignedPosition].push(player);
   });
 };
 
-(async () => {
-  console.time("read");
-  let allPlayersRaw = await fs.readFile("playerInfo.json", "utf-8").then(fileString=>JSON.parse(fileString));
-  console.timeEnd("read");
-  console.time("compute");
+/*
+  Uses python script to perform max flow min cost algorithm using
+  google ortools library
+*/
+let maxFlowMinCost = async (players, positions, positionCapacityMap, outputBins) => {
+  let pythonInputString = JSON.stringify({
+    players: players.map(player => ({
+      name: player.name,
+      posList: player.posList,
+      value: player.value
+    })),
+    positions: positions,
+    positionCapacityMap: positionCapacityMap
+  }).replace("\'",`'\"'\"'`); // escape single quotes (omg ikr)
+  let playerPosMappings = await runCommand(`${PYTHON_COMMAND} '${pythonInputString}'`).then(res=>JSON.parse(res));
+  players.forEach(player => {
+    // retrieve the assigned position from the maxFlowMinCost solution graph
+    let assignedPosition = playerPosMappings[player.name] || "BN";
+    outputBins[assignedPosition].push(player);
+  });
+  return pythonInputString;
+};
+
+let processInputFile = async (fileName) => {
+  let totalInputValue = 0, inputLog = [];
+  let totalOutputValue = 0, outputLog = [];
+  let allPlayersRaw = await fs.readFile(fileName, "utf-8").then(fileString=>JSON.parse(fileString));
+  if(!allPlayersRaw.length) {
+    return;
+  }
   let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
   let allPlayers = allPlayersRaw.map(player => ({
     name: player.name,
@@ -45,7 +59,7 @@ let maxFlowMinCost = (players, positions, positionCapacityMap, outputBins) => {
     value: player.averageFanPoints,
     hasGameToday: !!player.todaysGame,
     unhealthy: !!player.status
-  })).sort((a,b)=>(b.value-a.value));
+  })).sort((a,b)=>(b.value-a.value)).filter(player => player.currentPosition.indexOf("IR") === -1);
   let positionCapacityMap = allPlayers.reduce((acc, { currentPosition }) => {
     let pos = currentPosition;
     acc[pos] ? (acc[pos]++) : (acc[pos] = 1);
@@ -102,7 +116,11 @@ let maxFlowMinCost = (players, positions, positionCapacityMap, outputBins) => {
     return player.posList.some(pos=>nonExclusivePositions.indexOf(pos)>=0);
   });
   if(allNepPlayers.length > 0) {
-    maxFlowMinCost(allNepPlayers, nonExclusivePositions, positionCapacityMap, outputBins);
+    inputLog.push(JSON.stringify(allNepPlayers, undefined, 2));
+    inputLog.push(nonExclusivePositions);
+    inputLog.push(JSON.stringify(positionCapacityMap, undefined, 2));
+    let pythonInputString = await maxFlowMinCost(allNepPlayers, nonExclusivePositions, positionCapacityMap, outputBins);
+    inputLog.push(pythonInputString);
   }
   // update the remaining position capacities
   positions.forEach(pos => {
@@ -119,40 +137,57 @@ let maxFlowMinCost = (players, positions, positionCapacityMap, outputBins) => {
     return player.posList.some(pos=>nonExclusivePositions.indexOf(pos)>=0);
   });
   if(unhealthyNepPlayersWithGame.length > 0) {
-    maxFlowMinCost(unhealthyNepPlayersWithGame, nonExclusivePositions, positionCapacityMap, outputBins);
+    await maxFlowMinCost(unhealthyNepPlayersWithGame, nonExclusivePositions, positionCapacityMap, outputBins);
   }
-
-  console.timeEnd("compute");
 
   /*
     Logs...
   */
 
-  let totalInputValue = 0, inputLog = [];
   inputLog.push("Input:");
   positions.forEach(pos => {
     inputLog.push(`  ${pos}:`);
     let players = allPlayers.filter(player=>player.currentPosition===pos);
     players.forEach(player => {
       inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-      if(pos !== "BN" && player.hasGameToday) {
+      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
         totalInputValue += player.value;
       }
     });
   });
-  let totalOutputValue = 0, outputLog = [];
+
   outputLog.push("Output:");
   positions.forEach(pos => {
     outputLog.push(`  ${pos}:`);
     outputBins[pos].forEach(player => {
       outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-      if(pos !== "BN" && player.hasGameToday) {
+      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
         totalOutputValue += player.value;
       }
     });
   });
-  console.log(inputLog.join("\n"));
-  console.log(outputLog.join("\n"));
+  let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
+
   console.log("Total input value:", totalInputValue);
   console.log("Total output value:", totalOutputValue);
+  console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
+  if(percentDifference < -0.001) {
+    console.log(inputLog.join("\n"));
+    console.log(outputLog.join("\n"));
+  }
+};
+
+(async () => {
+  try {
+    let dir = await fs.readdir("out");
+    console.log(dir.length);
+    for(let i = 0; i < dir.length; i++) {
+      let fileName = `out/${dir[i]}`;
+      console.log(fileName);
+      await processInputFile(fileName);
+      console.log("-------------------");
+    }
+  } catch (err) {
+    console.log(err);
+  }
 })();

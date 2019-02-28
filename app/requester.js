@@ -51,22 +51,28 @@ let refreshTokenIfNeeded = async (accessToken, res) => {
   return accessToken;
 };
 
-module.exports.requester = async (query, accessToken, res) => {
+module.exports.requester = async (query, accessToken, res, enableLogs = true) => {
 
   // verify the user's id
   try {
     let userInfo = await verifyIDToken(accessToken.id_token);
-    console.log(`Making request to /${query.split(";")[0]} on behalf of ${userInfo.sub}`);
+    if(enableLogs) {
+      console.log(`Making request to /${query.split(";")[0]} on behalf of ${userInfo.sub}`);
+    }
     // console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
   } catch (err) {
-    console.log("Error validating user id_token");
+    if(enableLogs) {
+      console.log("Error validating user id_token");
+    }
     throw err;
   }
 
   try {
     accessToken = await refreshTokenIfNeeded(accessToken, res);
   } catch (err) {
-    console.log("Error refreshing access token");
+    if(enableLogs) {
+      console.log("Error refreshing access token");
+    }
     throw err;
   }
 
@@ -75,7 +81,9 @@ module.exports.requester = async (query, accessToken, res) => {
     let response = await rp({ url: new URL(query, API_BASE_URL).href, headers: { authorization: `Bearer ${accessToken.access_token}` } });
     return cheerio.load(response);
   } catch(err) {
-    console.log("Error sending request to Yahoo");
+    if(enableLogs) {
+      console.log("Error performing yahoo request");
+    }
     throw err;
   }
 };
