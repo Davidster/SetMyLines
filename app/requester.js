@@ -32,9 +32,6 @@ let verifyIDToken = async (idToken) => {
   });
 };
 
-<<<<<<< Updated upstream
-module.exports = async (query, accessToken, res) => {
-=======
 let refreshTokenIfNeeded = async (accessToken, res) => {
   // refresh the token if needed
   const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
@@ -54,7 +51,6 @@ let refreshTokenIfNeeded = async (accessToken, res) => {
 };
 
 module.exports.requester = async (query, accessToken, res, enableLogs = true) => {
->>>>>>> Stashed changes
 
   // verify the user's id
   try {
@@ -70,26 +66,6 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
     throw err;
   }
 
-<<<<<<< Updated upstream
-  // refresh the token if needed
-  const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
-  const expirationWindowStart = expirationTimeInSeconds - EXPIRATION_WINDOW_IN_SECONDS;
-  const nowInSeconds = (new Date()).getTime() / 1000;
-  const shouldRefresh = nowInSeconds >= expirationWindowStart;
-  if (shouldRefresh) {
-    try {
-      console.log("Token expired. Refreshing");
-      let newAccessToken = await oauth2.accessToken.create(accessToken).refresh();
-      accessToken = {
-        ...newAccessToken.token,
-        id_token: accessToken.id_token
-      };
-      res.cookie("accessToken", JSON.stringify(accessToken));
-    } catch (err) {
-      console.log("Error refreshing access token");
-      throw err;
-    }
-=======
   try {
     accessToken = await refreshTokenIfNeeded(accessToken, res);
   } catch (err) {
@@ -97,7 +73,6 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
       console.log("Error refreshing access token");
     }
     throw err;
->>>>>>> Stashed changes
   }
 
   // make signed request to Yahoo
@@ -111,3 +86,4 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
     throw err;
   }
 };
+module.exports.refreshTokenIfNeeded = refreshTokenIfNeeded;
