@@ -10,15 +10,16 @@ the ortools package. See https://cs.stackexchange.com/questions/104854/placing-i
 def main():
   """Solves the maxFlowMinCost problem in the context of nhl players getting assigned to an active roster"""
 
-  parser = argparse.ArgumentParser(description='Process some integers.')
+  parser = argparse.ArgumentParser()
   parser.add_argument('input')
   args = parser.parse_args()
   input = json.loads(args.input)
   debug = False
 
-  # inputString = '{"players":[{"name":"Auston Matthews","currentPosition":"C","posList":["C"],"value":17.272916666666667,"hasGameToday":true,"unhealthy":false},{"name":"Tomas Hertl","currentPosition":"RW","posList":["C","LW","RW"],"value":14.594915254237286,"hasGameToday":true,"unhealthy":false},{"name":"Claude Giroux","currentPosition":"LW","posList":["C","LW"],"value":14.344444444444445,"hasGameToday":true,"unhealthy":false},{"name":"Max Domi","currentPosition":"LW","posList":["C","LW"],"value":14.04375,"hasGameToday":true,"unhealthy":false},{"name":"Ryan Johansen","currentPosition":"C","posList":["C"],"value":12.871875,"hasGameToday":true,"unhealthy":false},{"name":"Eric Staal","currentPosition":"C","posList":["C"],"value":12.338095238095237,"hasGameToday":true,"unhealthy":false},{"name":"Logan Couture","currentPosition":"LW","posList":["C","LW"],"value":12.317187500000001,"hasGameToday":true,"unhealthy":false},{"name":"Jonathan Drouin","currentPosition":"BN","posList":["C","LW"],"value":10.428571428571429,"hasGameToday":true,"unhealthy":false}],"positions":["RW","C","LW"],"positionCapacityMap":{"BN":13,"RW":3,"C":3,"G":2,"LW":3,"D":6}}'
+
+  # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
   # input = json.loads(inputString)
-  # debug = False
+  # debug = True
 
   min_cost_flow = pywrapgraph.SimpleMinCostFlow()
   # for indexMap, node 0 is s, node 1 is t, nodes 2-(2 + positions.length) are positions, nodes (2 + positions.length)-(2 + positions.length + players.length) are players

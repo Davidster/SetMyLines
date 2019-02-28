@@ -14,7 +14,7 @@ let runCommand = (command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        return reject(stdout);
+        return reject(stdout || error);
       }
       resolve(stdout);
     });
@@ -34,8 +34,7 @@ let maxFlowMinCost = async (players, positions, positionCapacityMap, outputBins)
     })),
     positions: positions,
     positionCapacityMap: positionCapacityMap
-  });
-  console.log(JSON.parse(pythonInputString));
+  }).replace("\'",`'\"'\"'`); // escape single quotes (omg ikr)
   let playerPosMappings = await runCommand(`${PYTHON_COMMAND} '${pythonInputString}'`).then(res=>JSON.parse(res));
   players.forEach(player => {
     // retrieve the assigned position from the maxFlowMinCost solution graph
