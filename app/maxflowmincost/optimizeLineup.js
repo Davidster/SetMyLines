@@ -7,7 +7,6 @@ const PYTHON_COMMAND = "python maxFlowMinCost.py";
 /*
   TODO: make sure goalies who are officially starting are prioritized over those who are not. this can be
         easily done by marking the goalie as unhealthy if they are not starting
-  TODO: filter away players that are placed on the IR position (not to be confused with players who have IR status)
 */
 
 let runCommand = (command) => {
@@ -48,9 +47,7 @@ let processInputFile = async (fileName) => {
   let totalInputValue = 0, inputLog = [];
   let totalOutputValue = 0, outputLog = [];
   let allPlayersRaw = await fs.readFile(fileName, "utf-8").then(fileString=>JSON.parse(fileString));
-  // console.log(fileName);
   if(!allPlayersRaw.length) {
-    // console.log("allPlayersRaw is empty");
     return;
   }
   let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
@@ -170,7 +167,6 @@ let processInputFile = async (fileName) => {
   });
   let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
 
-  // console.log();
   console.log("Total input value:", totalInputValue);
   console.log("Total output value:", totalOutputValue);
   console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
@@ -181,8 +177,6 @@ let processInputFile = async (fileName) => {
 };
 
 (async () => {
-  // await processInputFile("playerInfo.json");
-  // return;
   try {
     let dir = await fs.readdir("out");
     console.log(dir.length);
@@ -195,5 +189,4 @@ let processInputFile = async (fileName) => {
   } catch (err) {
     console.log(err);
   }
-
 })();
