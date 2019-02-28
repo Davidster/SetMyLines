@@ -7,7 +7,6 @@ const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
 
 router.get("/", async (req, res, next) => {
   try {
-    console.log(JSON.parse(req.cookies.accessToken).access_token);
     let $ = await requester(TEAMS_QUERY, JSON.parse(req.cookies.accessToken), res);
     if($) {
       let teams = [];
