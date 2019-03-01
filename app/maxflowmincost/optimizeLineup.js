@@ -6,8 +6,7 @@ const { exec } = require("child_process");
 const PYTHON_COMMAND = "python maxFlowMinCost.py";
 
 /*
-  TODO: make sure goalies who are officially starting are prioritized over those who are not. this can be
-        easily done by marking the goalie as unhealthy if they are not starting
+  TODO: nothing ATM
 */
 
 let runCommand = (command) => {
@@ -60,6 +59,12 @@ let processInputFile = async (fileName) => {
     hasGameToday: !!player.todaysGame,
     unhealthy: !!player.status
   })).sort((a,b)=>(b.value-a.value)).filter(player => player.currentPosition.indexOf("IR") === -1);
+  // make sure goalies who are officially starting are prioritized over those who are not by marking them as unhealthy
+  allPlayers.forEach(player => {
+    if(player.posList.length === 1 && player.posList[0] === "G") {
+      player.unhealthy = player.unhealthy || !playerMap[player.name].startingStatus
+    }
+  });
   let positionCapacityMap = allPlayers.reduce((acc, { currentPosition }) => {
     let pos = currentPosition;
     acc[pos] ? (acc[pos]++) : (acc[pos] = 1);
