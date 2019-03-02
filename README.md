@@ -10,6 +10,7 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - ~Figure out how to use yahoo API to update roster~
 - ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
 - ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~ Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
+- Create SQLite database to store user settings
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
 - Create docker image for easy deployment/scaling
