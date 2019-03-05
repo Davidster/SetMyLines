@@ -1,0 +1,147 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Express Application/API powered by API Gateway and Lambda
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      DefinitionUri: ./simple-proxy-api.yaml
+      StageName: prod
+      Variables:
+        ServerlessExpressLambdaFunctionName: !Ref SetMyLinesAPIHandler
+
+  ApiGatewayMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiGatewayDomainName
+      RestApiId: !Ref ApiGatewayApi
+      Stage: prod
+
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      # CertificateArn: arn:aws:acm:us-east-1:171337445867:certificate/e2fb1e2f-79df-47bc-b576-a13956561337 # *setmylines.com
+      CertificateArn: arn:aws:acm:us-east-1:171337445867:certificate/95b803fe-8a1b-4de9-98fd-cf8ca842311b # setmylines.com
+      DomainName: setmylines.com
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+
+  LambdaApiGatewayExecutionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SetMyLinesAPIHandler.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Join
+        - ''
+        - - 'arn:aws:execute-api:'
+          - !Ref AWS::Region
+          - ":"
+          - !Ref AWS::AccountId
+          - ":"
+          - !Ref ApiGatewayApi
+          - "/*/*"
+
+  SetMyLinesAPIHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./expressLambda
+      Handler: lambda.handler
+      MemorySize: 1024
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: nodejs8.10
+      Timeout: 30
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /{proxy+}
+            Method: ANY
+
+  MaxFlowMinCostHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./maxFlowLambda/lambda.zip
+      Handler: lambda.handler
+      MemorySize: 1024
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python2.7
+
+  SubdomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      Name: setmylines.com
+      HostedZoneName: setmylines.com.
+      AliasTarget:
+        DNSName: !GetAtt ApiGatewayDomainName.DistributionDomainName
+        HostedZoneId: !GetAtt ApiGatewayDomainName.DistributionHostedZoneId
+        # DNSName: !Join
+        #   - ''
+        #   - - !Ref ApiGatewayApi
+        #     - ".execute-api.us-east-1.amazonaws.com/prod"
+        # HostedZoneId: ZJ4FD83POSSR6
+
+Outputs:
+  ExpressAppLambdaConsoleUrl:
+    Description: Console URL for the express app Lambda Function.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref AWS::Region
+        - ".console.aws.amazon.com/lambda/home?region="
+        - !Ref AWS::Region
+        - "#/functions/"
+        - !Ref SetMyLinesAPIHandler
+
+  MaxFlowLambdaConsoleUrl:
+    Description: Console URL for the max flow min cost calculation Lambda Function.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref AWS::Region
+        - ".console.aws.amazon.com/lambda/home?region="
+        - !Ref AWS::Region
+        - "#/functions/"
+        - !Ref MaxFlowMinCostHandler
+
+  ApiGatewayApiConsoleUrl:
+    Description: Console URL for the API Gateway API's Stage.
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref AWS::Region
+        - ".console.aws.amazon.com/apigateway/home?region="
+        - !Ref AWS::Region
+        - "#/apis/"
+        - !Ref ApiGatewayApi
+        - "/stages/prod"
