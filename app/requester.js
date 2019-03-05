@@ -78,7 +78,7 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
 
   // make signed request to Yahoo
   try {
-    let response = await rp({ url: new URL(query, API_BASE_URL).href, headers: { authorization: `Bearer ${accessToken.access_token}` } });
+    let response = await rp({ url: `${API_BASE_URL}${query}`, headers: { authorization: `Bearer ${accessToken.access_token}` } });
     return cheerio.load(response);
   } catch(err) {
     if(enableLogs) {

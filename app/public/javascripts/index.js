@@ -53,6 +53,7 @@ let buildTeamDivs = (teams) => {
 };
 
 $(async () => {
+  // return console.log("Heylo wurld!");
   let cookieMap = getCookieMap();
   let accessTokenObj = cookieMap.accessToken;
   if(!accessTokenObj && window.location.hostname !== "localhost") {

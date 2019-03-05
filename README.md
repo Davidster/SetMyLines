@@ -10,10 +10,31 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - ~Figure out how to use yahoo API to update roster~
 - ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
 - ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~ Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
-- Create SQLite database to store user settings
+- ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
+- Clean out all code that was used to deploy the app to a VPS
+- Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda
+- Add DynamoDB table to hold user info.
+- Add CloudWatch events to perform roster updates on regular basis
+- Create jscalc to estimate cost of website.
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
-- Create docker image for easy deployment/scaling
+- Create a fancy-ass frontend in React
+
+### Some cost estimation notes:
+
+#### API Gateway
+0$
+
+#### Lambda
+52 * 100ms of lambda execution time per page load -> 52 * 0.000001667$ -> 0.009 cents per page load
+
+1 million page loads per month: 52 * 1000000 * 0.000001667 -> $86.684/mo
+
+#### Route53
+0.5$/mo
+
+*DynamoDB costs will probably be the most significant...*
+
 
 ## Project description attempt
 
