@@ -11,7 +11,7 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
 - ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~ Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
 - ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
-- Clean out all code that was used to deploy the app to a VPS
+- ~Clean out all code that was used to deploy the app to a VPS~
 - Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda
 - Read up about csrf and figure out how to mitigate this issue in my use case
 - Add DynamoDB table to hold user info.
