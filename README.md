@@ -13,7 +13,7 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
 - ~Clean out all code that was used to deploy the app to a VPS~
 - Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda
-- Read up about csrf and figure out how to mitigate this issue in my use case
+- Read up about csrf and figure out how to mitigate this issue in my use case. Cookies should be set to use "httponly" and "secure". When a user visits the website, read a csrf token from the database and send it back to the client for him to include in all write requests. Ideally this csrf token should be changed regularly, maybe once per day (maybe use dynamodb timeToLive)
 - Add DynamoDB table to hold user info.
 - Add CloudWatch events to perform roster updates on regular basis
 - Create jscalc to estimate cost of website.
