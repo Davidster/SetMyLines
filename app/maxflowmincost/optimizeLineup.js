@@ -43,28 +43,9 @@ let maxFlowMinCost = async (players, positions, positionCapacityMap, outputBins)
   return pythonInputString;
 };
 
-let processInputFile = async (fileName) => {
+let optimizeLineup = async (allPlayers, debug = false) => {
   let totalInputValue = 0, inputLog = [];
   let totalOutputValue = 0, outputLog = [];
-  let allPlayersRaw = await fs.readFile(fileName, "utf-8").then(fileString=>JSON.parse(fileString));
-  if(!allPlayersRaw.length) {
-    return;
-  }
-  let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
-  let allPlayers = allPlayersRaw.map(player => ({
-    name: player.name,
-    currentPosition: player.selectedPos,
-    posList: player.eligiblePosList,
-    value: player.averageFanPoints,
-    hasGameToday: !!player.todaysGame,
-    unhealthy: !!player.status
-  })).sort((a,b)=>(b.value-a.value)).filter(player => player.currentPosition.indexOf("IR") === -1);
-  // make sure goalies who are officially starting are prioritized over those who are not by marking them as unhealthy
-  allPlayers.forEach(player => {
-    if(player.posList.length === 1 && player.posList[0] === "G") {
-      player.unhealthy = player.unhealthy || !playerMap[player.name].startingStatus
-    }
-  });
   let positionCapacityMap = allPlayers.reduce((acc, { currentPosition }) => {
     let pos = currentPosition;
     acc[pos] ? (acc[pos]++) : (acc[pos] = 1);
@@ -149,37 +130,63 @@ let processInputFile = async (fileName) => {
     Logs...
   */
 
-  inputLog.push("Input:");
-  positions.forEach(pos => {
-    inputLog.push(`  ${pos}:`);
-    let players = allPlayers.filter(player=>player.currentPosition===pos);
-    players.forEach(player => {
-      inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
-        totalInputValue += player.value;
-      }
+  if(debug) {
+    inputLog.push("Input:");
+    positions.forEach(pos => {
+      inputLog.push(`  ${pos}:`);
+      let players = allPlayers.filter(player=>player.currentPosition===pos);
+      players.forEach(player => {
+        inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+        if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
+          totalInputValue += player.value;
+        }
+      });
     });
-  });
 
-  outputLog.push("Output:");
-  positions.forEach(pos => {
-    outputLog.push(`  ${pos}:`);
-    outputBins[pos].forEach(player => {
-      outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
-        totalOutputValue += player.value;
-      }
+    outputLog.push("Output:");
+    positions.forEach(pos => {
+      outputLog.push(`  ${pos}:`);
+      outputBins[pos].forEach(player => {
+        outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+        if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
+          totalOutputValue += player.value;
+        }
+      });
     });
-  });
-  let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
+    let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
 
-  console.log("Total input value:", totalInputValue);
-  console.log("Total output value:", totalOutputValue);
-  console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
-  if(percentDifference < -0.001) {
-    console.log(inputLog.join("\n"));
-    console.log(outputLog.join("\n"));
+    console.log("Total input value:", totalInputValue);
+    console.log("Total output value:", totalOutputValue);
+    console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
+    if(percentDifference < -0.001) {
+      console.log(inputLog.join("\n"));
+      console.log(outputLog.join("\n"));
+    }
   }
+  return outputBins;
+};
+
+let processInputFile = async (fileName) => {
+  let allPlayersRaw = await fs.readFile(fileName, "utf-8").then(fileString=>JSON.parse(fileString));
+  if(!allPlayersRaw.length) {
+    return;
+  }
+  let playerMap = allPlayersRaw.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
+  let allPlayers = allPlayersRaw.map(player => ({
+    name: player.name,
+    currentPosition: player.selectedPos,
+    posList: player.eligiblePosList,
+    value: player.averageFanPoints,
+    hasGameToday: !!player.todaysGame,
+    unhealthy: !!player.status
+  })).sort((a,b)=>(b.value-a.value)).filter(player => player.currentPosition.indexOf("IR") === -1);
+  // make sure goalies who are officially starting are prioritized over those who are not by marking them as unhealthy
+  allPlayers.forEach(player => {
+    if(player.posList.length === 1 && player.posList[0] === "G") {
+      player.unhealthy = player.unhealthy || !playerMap[player.name].startingStatus
+    }
+  });
+  await optimizeLineup(allPlayers, true);
 };
 
 (async () => {
@@ -196,3 +203,5 @@ let processInputFile = async (fileName) => {
     console.log(err);
   }
 })();
+
+module.exports.optimizeLineup = optimizeLineup;
