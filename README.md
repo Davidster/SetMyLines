@@ -12,7 +12,9 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~ Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
 - ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
 - ~Clean out all code that was used to deploy the app to a VPS~
-- Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda
+- ~Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda~
+- Split getTeamRoster.js into two source files.. also clean up that code.. it is a :hankey: - show.
+- Upgrade python version in lambda to 3.x instead of 2.7
 - Read up about csrf and figure out how to mitigate this issue in my use case. Cookies should be set to use "httponly" and "secure". When a user visits the website, read a csrf token from the database and send it back to the client for him to include in all write requests. Ideally this csrf token should be changed regularly, maybe once per day (maybe use dynamodb timeToLive)
 - Add DynamoDB table to hold user info.
 - Add CloudWatch events to perform roster updates on regular basis
@@ -20,6 +22,7 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
 - Create a fancy-ass frontend in React
+- Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES
 
 ### Some cost estimation notes:
 

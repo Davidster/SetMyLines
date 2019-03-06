@@ -25,7 +25,7 @@ Resources:
       CertificateArn: arn:aws:acm:us-east-1:171337445867:certificate/95b803fe-8a1b-4de9-98fd-cf8ca842311b # setmylines.com
       DomainName: setmylines.com
 
-  LambdaExecutionRole:
+  SetMyLinesLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -37,7 +37,38 @@ Resources:
           Action: sts:AssumeRole
       Path: "/"
       Policies:
-      - PolicyName: root
+      - PolicyName: BasicLambdaExecution
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: invokeMaxFlowLambda
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            Resource: !GetAtt MaxFlowMinCostHandler.Arn
+
+  MaxFlowLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: BasicLambdaExecution
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -48,7 +79,7 @@ Resources:
             - logs:PutLogEvents
             Resource: arn:aws:logs:*:*:*
 
-  LambdaApiGatewayExecutionPermission:
+  SetMyLinesApiGatewayExecutionPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
@@ -70,9 +101,12 @@ Resources:
       CodeUri: ./expressLambda
       Handler: lambda.handler
       MemorySize: 1024
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !GetAtt SetMyLinesLambdaRole.Arn
       Runtime: nodejs8.10
       Timeout: 30
+      Environment:
+        Variables:
+          MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
       Events:
         ProxyApiRoot:
           Type: Api
@@ -93,7 +127,7 @@ Resources:
       CodeUri: ./maxFlowLambda/lambda.zip
       Handler: lambda.handler
       MemorySize: 1024
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !GetAtt MaxFlowLambdaRole.Arn
       Runtime: python2.7
 
   SubdomainRecordSet:
