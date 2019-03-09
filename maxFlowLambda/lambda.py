@@ -7,9 +7,6 @@ Use maximum flow, minimum cost algorithm with the help of
 the ortools package. See https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value.
 '''
 
-def main():
-    handler()
-
 def handler(input, context):
   """Solves the maxFlowMinCost problem in the context of nhl players getting assigned to an active roster"""
 
