@@ -7,9 +7,13 @@ Use maximum flow, minimum cost algorithm with the help of
 the ortools package. See https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value.
 '''
 
+def main():
+    handler(None, None)
+
 def handler(input, context):
   """Solves the maxFlowMinCost problem in the context of nhl players getting assigned to an active roster"""
 
+  debug = False
   print("Received input:")
   print(input)
 
@@ -17,12 +21,12 @@ def handler(input, context):
   # parser.add_argument('input')
   # args = parser.parse_args()
   # input = json.loads(args.input)
-  # debug = False
+
 
 
   # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
   # input = json.loads(inputString)
-  debug = True
+  # debug = True
 
   min_cost_flow = pywrapgraph.SimpleMinCostFlow()
   # for indexMap, node 0 is s, node 1 is t, nodes 2-(2 + positions.length) are positions, nodes (2 + positions.length)-(2 + positions.length + players.length) are players

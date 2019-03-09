@@ -122,3 +122,21 @@ Response:
 </fantasy_content>
 <!-- fanos299.sports.bf1.yahoo.com Mon Feb 25 07:33:52 UTC 2019 -->
 ```
+
+## Project dependency installation
+
+### Node.js
+
+See [nvm docs](https://github.com/creationix/nvm)
+
+```
+cd expressLambda
+npm install
+```
+
+### Python 3
+
+```
+sudo apt install python3 python3-pip python3-dev python3-wheel python3-setuptools python3-six python3-venv
+python3 -m pip install -U --user ortools
+```

@@ -128,7 +128,7 @@ Resources:
       Handler: lambda.handler
       MemorySize: 1024
       Role: !GetAtt MaxFlowLambdaRole.Arn
-      Runtime: python2.7
+      Runtime: python3.6
 
   SubdomainRecordSet:
     Type: AWS::Route53::RecordSet

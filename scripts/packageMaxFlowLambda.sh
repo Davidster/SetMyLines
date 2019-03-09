@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-cd maxFlowLambda
-virtualenv v-env &&
+cd maxFlowLambda &&
+python3 -m venv v-env &&
 source v-env/bin/activate &&
-python -m pip install ortools &&
+python3 -m pip install ortools &&
 deactivate &&
-cd v-env/lib/python2.7/site-packages/ &&
+cd v-env/lib64/python3.6/site-packages/
 zip -rq ../../../../lambda.zip . &&
 cd ../../../../ &&
 zip -g lambda.zip lambda.py &&
