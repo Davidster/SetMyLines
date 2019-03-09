@@ -21,6 +21,7 @@ let verifyIDToken = async (idToken) => {
   let splitToken = idToken.split(".");
   let joseHeader = JSON.parse(Buffer.from(splitToken[0], "base64").toString());
   let payload = JSON.parse(Buffer.from(splitToken[1], "base64").toString());
+  // TODO: shave off some request time by caching this jwk object into DB
   let jwksUrl = await rp(DISCOVERY_DOCUMENT_URL).then(res=>JSON.parse(res).jwks_uri);
   let jwk = await rp(jwksUrl).then(res=>JSON.parse(res).keys.filter(jwk=>jwk.kid===joseHeader.kid)[0]);
   return new Promise((resolve, reject) => {
@@ -51,20 +52,22 @@ let refreshTokenIfNeeded = async (accessToken, res) => {
   return accessToken;
 };
 
-module.exports.requester = async (query, accessToken, res, enableLogs = true) => {
+module.exports.requester = async (query, accessToken, res, verifyID = false, enableLogs = true) => {
+  if(enableLogs) {
+    console.log(`Making request to /${query.split(";")[0]}`);
+  }
 
-  // verify the user's id
-  try {
-    let userInfo = await verifyIDToken(accessToken.id_token);
-    if(enableLogs) {
-      console.log(`Making request to /${query.split(";")[0]} on behalf of ${userInfo.sub}`);
+  if(verifyID) {
+    // verify the user's id
+    try {
+      let userInfo = await verifyIDToken(accessToken.id_token);
+      // console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
+    } catch (err) {
+      if(enableLogs) {
+        console.log("Error validating user id_token");
+      }
+      throw err;
     }
-    // console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
-  } catch (err) {
-    if(enableLogs) {
-      console.log("Error validating user id_token");
-    }
-    throw err;
   }
 
   try {
@@ -78,6 +81,7 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
 
   // make signed request to Yahoo
   try {
+
     let response = await rp({ url: `${API_BASE_URL}${query}`, headers: { authorization: `Bearer ${accessToken.access_token}` } });
     return cheerio.load(response);
   } catch(err) {
@@ -88,3 +92,4 @@ module.exports.requester = async (query, accessToken, res, enableLogs = true) =>
   }
 };
 module.exports.refreshTokenIfNeeded = refreshTokenIfNeeded;
+module.exports.verifyIDToken = verifyIDToken;

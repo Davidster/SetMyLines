@@ -8,25 +8,23 @@ the ortools package. See https://cs.stackexchange.com/questions/104854/placing-i
 '''
 
 def main():
-    handler(None, None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input')
+    args = parser.parse_args()
+    input = json.loads(args.input)
+    out = handler(input, None, False, False)
 
-def handler(input, context):
+def handler(input, context, debug = True, verbose = False):
   """Solves the maxFlowMinCost problem in the context of nhl players getting assigned to an active roster"""
 
-  debug = False
-  print("Received input:")
-  print(input)
+   # debug = True
+   # verbose = True
+   # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
+   # input = json.loads(inputString)
 
-  # parser = argparse.ArgumentParser()
-  # parser.add_argument('input')
-  # args = parser.parse_args()
-  # input = json.loads(args.input)
-
-
-
-  # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
-  # input = json.loads(inputString)
-  # debug = True
+  if(debug):
+      print("Received input:")
+      print(input)
 
   min_cost_flow = pywrapgraph.SimpleMinCostFlow()
   # for indexMap, node 0 is s, node 1 is t, nodes 2-(2 + positions.length) are positions, nodes (2 + positions.length)-(2 + positions.length + players.length) are players
@@ -69,7 +67,7 @@ def handler(input, context):
   min_cost_flow.SetNodeSupply(0, totalSupply)
   min_cost_flow.SetNodeSupply(1, -totalSupply)
 
-  if(debug):
+  if(verbose):
     print("total supply: %1s" % (totalSupply))
     print('Arc    Flow / Capacity  Cost')
     for i in range(min_cost_flow.NumArcs()):
@@ -87,7 +85,7 @@ def handler(input, context):
   if resultStatus == min_cost_flow.OPTIMAL:
     out = {}
     for i in range(min_cost_flow.NumArcs()):
-      if(debug):
+      if(verbose):
         cost = min_cost_flow.Flow(i) * min_cost_flow.UnitCost(i)
         print('%1s -> %1s   %3s  / %3s       %3s' % (
           indexMap[min_cost_flow.Tail(i)],
@@ -103,7 +101,8 @@ def handler(input, context):
         playerName = indexMap[min_cost_flow.Tail(i)]
         assignedPosition = indexMap[min_cost_flow.Head(i)]
         out[playerName] = assignedPosition
-    print("Returning output:")
+    if(debug):
+        print("Returning output:")
     print(json.dumps(out))
     return out
   else:

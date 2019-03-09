@@ -12,7 +12,7 @@ module.exports.parseGameSettings = ($gsDoc) => {
   return statIDMap;
 };
 
-module.exports.parseLeagueSettings = ($lsDoc, statIDMap) => {
+module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) => {
   let $statModifiers = $lsDoc("stat_modifiers stat");
   $lsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $lsDoc(statCategory);
@@ -28,6 +28,10 @@ module.exports.parseLeagueSettings = ($lsDoc, statIDMap) => {
       enabled: $statCategory.find("enabled").text(),
       fanPointsPerUnit: statValue
     };
+  });
+  $lsDoc("roster_positions roster_position").each((i, rosterPosition) => {
+    let $rosterPosition = $lsDoc(rosterPosition);
+    positionCapacityMap[$rosterPosition.find("position").text()] = parseInt($rosterPosition.find("count").text());
   });
 };
 

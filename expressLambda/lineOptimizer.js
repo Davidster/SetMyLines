@@ -1,12 +1,19 @@
 const AWS = require("aws-sdk");
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
+const path = require("path");
+const { exec } = require("child_process");
+const MFMC_SCRIPT_PATH = path.resolve(__dirname, "../maxFlowLambda/lambda.py");
 
 /*
   valueAttribute is the attribute on the player object that we wish to optimize in maxflow,
   thus it should exist on each player object. some example attributes include "averageFanPoints",
   "totalFanPoints"
 */
-module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribute, debug = false) => {
+module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribute, positionCapacityMap, debug = false) => {
+  // clone inputs to remove side effects
+  rawPlayersArray = JSON.parse(JSON.stringify(rawPlayersArray));
+  positionCapacityMap = JSON.parse(JSON.stringify(positionCapacityMap));
+
   let playerMap = rawPlayersArray.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
   let filteredPlayers = rawPlayersArray.map(player => ({
     name: player.name,
@@ -23,27 +30,46 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     }
   });
 
-  let totalInputValue = 0, inputLog = [];
-  let totalOutputValue = 0, outputLog = [];
 
-  let positionCapacityMap = filteredPlayers.reduce((acc, { currentPosition }) => {
-    let pos = currentPosition;
-    acc[pos] ? (acc[pos]++) : (acc[pos] = 1);
-    return acc;
-  }, {});
-  let positions = Object.keys(positionCapacityMap);
+  let positions = Object.keys(positionCapacityMap).filter(position=>position.indexOf("IR") === -1);
+  // If the league includes a Util spot, add Util to position list of all non-goalie players
+  if(positions.indexOf("Util") >= 0) {
+    filteredPlayers.forEach(player => {
+      if(player.posList.indexOf("G") === -1) {
+        player.posList.push("Util");
+      }
+    });
+  }
   let activePositions = positions.filter(pos=>pos!=="BN");
 
+  let totalInputValue = 0, inputLog = [];
+  let totalOutputValue = 0, outputLog = [];
   let outputBins = positions.reduce((acc, pos) => {
     acc[pos] = [];
     return acc;
   }, {});
-  // add all playes without a game to the bench
-  outputBins["BN"] = outputBins["BN"].concat(filteredPlayers.filter(player=>!player.hasGameToday));
 
   let playersWithGame = filteredPlayers.filter(player=>player.hasGameToday);
+  let playersWithoutGame = filteredPlayers.filter(player=>!player.hasGameToday);
   let healthyPlayersWithGame = playersWithGame.filter(player=>!player.unhealthy);
   let unhealthyPlayersWithGame = playersWithGame.filter(player=>!!player.unhealthy);
+
+  // if the league has no bench position, do nothing. just reformat the input array as a map
+  if(positionCapacityMap["BN"] === undefined) {
+    outputBins = filteredPlayers.reduce((acc, player) => {
+      acc[player.currentPosition] = [];
+      return acc;
+    }, {});
+    filteredPlayers.forEach(player => {
+      outputBins[player.currentPosition].push(player);
+    });
+    return outputBins;
+  }
+
+  /*
+    Add all players without a game to the bench
+  */
+  outputBins["BN"] = outputBins["BN"].concat(playersWithoutGame);
 
   /*
     Find positions for which all eligible players only have
@@ -159,6 +185,9 @@ let performMaxFlowMinCost = async (players, positions, positionCapacityMap, outp
 };
 
 let invokeMaxFlowMinCostLambda = (inputString) => {
+  if(process.env.RUN_LOCAL) {
+    return invokeMaxFlowMinCostLocal(inputString);
+  }
   return new Promise((resolve, reject) => {
     let params = {
       FunctionName: process.env.MAXFLOW_LAMBDA_NAME,
@@ -172,6 +201,20 @@ let invokeMaxFlowMinCostLambda = (inputString) => {
         return reject(data.Payload);
       }
       resolve(data.Payload);
+    });
+  });
+};
+
+let invokeMaxFlowMinCostLocal = (inputString) => {
+  return new Promise((resolve, reject) => {
+    exec(`python3 ${MFMC_SCRIPT_PATH} '${inputString.replace("\'",`'\"'\"'`)}'`, (error, stdout, stderr) => {
+      if (error) {
+        return reject({
+          stdout: stdout,
+          stderr: stderr
+        });
+      }
+      resolve(stdout);
     });
   });
 };

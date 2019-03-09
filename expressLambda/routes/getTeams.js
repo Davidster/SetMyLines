@@ -8,7 +8,7 @@ const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
 
 router.get("/", async (req, res, next) => {
   try {
-    let $teamDoc = await requester(TEAMS_QUERY, JSON.parse(req.cookies.accessToken), res);
+    let $teamDoc = await requester(TEAMS_QUERY, JSON.parse(req.cookies.accessToken), res, true);
     res.send(JSON.stringify(parseTeamDoc($teamDoc)));
   } catch(err) {
     console.log(err);

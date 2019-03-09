@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const rp = require("request-promise");
 const moment = require("moment");
-const { requester, refreshTokenIfNeeded } = require("../requester");
+const { requester, refreshTokenIfNeeded, verifyIDToken } = require("../requester");
 const { parseNhlDailySchedule } = require("../parsers/nhlDailySchedule");
 const { parseTeamRoster,
         parsePlayerStats,
@@ -41,23 +41,35 @@ router.get("/", async (req, res, next) => {
 
   let allPlayerInfo, optimizationResults = {};
   try {
+    // fire nhl daily schedule request first since we don't need the access token
+    let nhlDailyScheduleReqPromise = rp(dailyScheduleReq);
+
+    // prepare access token
+    let tokenCheckResults = await Promise.all([
+      verifyIDToken(accessToken.id_token),
+      refreshTokenIfNeeded(accessToken, res)
+    ]);
+    accessToken = tokenCheckResults[1];
+
     // perform yahoo queries
     let playerInfoSub = {};
-    accessToken = await refreshTokenIfNeeded(accessToken, res);
+
     let requests = await Promise.all([
       requester(teamRosterQuery, accessToken, res).then($trDoc => {
         playerInfoSub = parseTeamRoster($trDoc);
         return Promise.all(batchPlayerStatsRequests(Object.keys(playerInfoSub), accessToken, res));
       }),
-      rp(dailyScheduleReq),
+      nhlDailyScheduleReqPromise,
       requester(gameSettingsQuery, accessToken, res),
-      requester(leagueSettingsQuery, accessToken, res)
+      requester(leagueSettingsQuery, accessToken, res),
     ]);
 
     // parse query results
     let dailyGameMap = parseNhlDailySchedule(JSON.parse(requests[1]));
     let statIDMap = parseGameSettings(requests[2]);
-    parseLeagueSettings(requests[3], statIDMap);
+    let positionCapacityMap = {};
+    // this function mutates the statIDMap and positionCapacityMap objects
+    parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
     allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap);
 
     let aggregateStatCategories = [
@@ -66,7 +78,7 @@ router.get("/", async (req, res, next) => {
     ];
     for(let i = 0; i < aggregateStatCategories.length; i++) {
       let category = aggregateStatCategories[i];
-      optimizationResult = await optimizeLineupByAttribute(allPlayerInfo, category, false);
+      optimizationResult = await optimizeLineupByAttribute(allPlayerInfo, category, positionCapacityMap, false);
       optimizationResults[category] = optimizationResult;
     }
 
