@@ -28,7 +28,7 @@ let batchPlayerStatsRequests = (playerKeys, accessToken, res) => {
 router.get("/", async (req, res, next) => {
   // parse request
   let accessToken = JSON.parse(req.cookies.accessToken);
-  let date = "2019-03-07" || moment().format("YYYY-MM-DD");
+  let date = undefined || moment().format("YYYY-MM-DD");
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
