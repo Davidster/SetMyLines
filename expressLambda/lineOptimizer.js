@@ -168,6 +168,9 @@ let invokeMaxFlowMinCostLambda = (inputString) => {
       if (err) {
         return reject(err);
       }
+      if(data.FunctionError) {
+        return reject(data.Payload);
+      }
       resolve(data.Payload);
     });
   });
