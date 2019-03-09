@@ -1,3 +1,6 @@
+const AWS = require("aws-sdk");
+const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
+
 /*
   valueAttribute is the attribute on the player object that we wish to optimize in maxflow,
   thus it should exist on each player object. some example attributes include "averageFanPoints",
@@ -137,8 +140,6 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   google ortools library
 */
 let performMaxFlowMinCost = async (players, positions, positionCapacityMap, outputBins) => {
-  outputBins["BN"] = outputBins["BN"].concat(players);
-  return;
   let pythonInputString = JSON.stringify({
     players: players.map(player => ({
       name: player.name,

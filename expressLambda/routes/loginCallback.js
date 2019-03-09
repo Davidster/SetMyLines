@@ -1,8 +1,8 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   const tokenConfig = {
     code: req.query.code,
     redirect_uri: `https://${process.env.OAUTH_DOMAIN}/loginCallback`
@@ -13,8 +13,8 @@ router.get('/', async (req, res, next) => {
     res.cookie("accessToken", JSON.stringify(accessToken.token));
     res.render("loginRedirect");
   } catch (error) {
-    console.log('Access Token Error', error.message);
-    res.send('Login Error');
+    console.log("Access Token Error", error.message);
+    res.send("Login Error");
   }
 });
 

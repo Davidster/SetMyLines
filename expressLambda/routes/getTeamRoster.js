@@ -2,8 +2,6 @@ var express = require("express");
 var router = express.Router();
 const rp = require("request-promise");
 const moment = require("moment");
-const AWS = require("aws-sdk");
-const lambda = new AWS.Lambda({ apiVersion: '2015-03-31' });
 const { requester, refreshTokenIfNeeded } = require("../requester");
 const { parseNhlDailySchedule } = require("../parsers/nhlDailySchedule");
 const { parseTeamRoster,
