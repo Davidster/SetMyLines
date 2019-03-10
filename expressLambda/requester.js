@@ -47,7 +47,7 @@ let refreshTokenIfNeeded = async (accessToken, res) => {
       ...newAccessToken.token,
       id_token: accessToken.id_token
     };
-    res.cookie("accessToken", JSON.stringify(accessToken));
+    res.cookie("accessToken", JSON.stringify(accessToken), cookieOptions);
   }
   return accessToken;
 };
