@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const rp = require("request-promise");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const { requester, refreshTokenIfNeeded, verifyIDToken } = require("../requester");
 const { parseNhlDailySchedule } = require("../parsers/nhlDailySchedule");
 const { parseTeamRoster,
@@ -28,7 +28,7 @@ let batchPlayerStatsRequests = (playerKeys, accessToken, res) => {
 router.get("/", async (req, res, next) => {
   // parse request
   let accessToken = JSON.parse(req.cookies.accessToken);
-  let date = undefined || moment().format("YYYY-MM-DD");
+  let date = undefined || moment().tz("America/New_York").format("YYYY-MM-DD");
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
