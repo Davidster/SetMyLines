@@ -94,4 +94,15 @@ router.get("/", async (req, res, next) => {
   }));
 });
 
+router.post("/", async (req, res, next) => {
+  console.log("Access token", req.cookies.accessToken.slice(0,10), "...");
+  console.log("request params", req.body);
+  console.log("changed a ting ting");
+
+  // return results to client
+  res.send(JSON.stringify({
+    ladiesAndGentlemen: "we got him"
+  }));
+});
+
 module.exports = router;

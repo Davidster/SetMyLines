@@ -1,17 +1,27 @@
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
+const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const csrfProtection = csrf({ cookie: true });
 const indexRouter = require("./routes/index");
 const loginRouter = require("./routes/login");
 const loginCallbackRouter = require("./routes/loginCallback");
 const getTeams = require("./routes/getTeams");
 const getTeamRoster = require("./routes/getTeamRoster");
+
+cookieOptions = {
+  httpOnly: true
+};
+
+if(process.env.RUN_LOCAL === undefined) {
+  cookieOptions.secure = true;
+}
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -46,11 +56,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/login", loginRouter);
-app.use("/loginCallback", loginCallbackRouter);
-app.use("/getTeams", getTeams);
-app.use("/getTeamRoster", getTeamRoster);
+app.use("/", csrfProtection, indexRouter);
+app.use("/login", csrfProtection, loginRouter);
+app.use("/loginCallback", csrfProtection, loginCallbackRouter);
+app.use("/getTeams", csrfProtection, getTeams);
+app.use("/getTeamRoster", csrfProtection, getTeamRoster);
 
 
 // catch 404 and forward to error handler

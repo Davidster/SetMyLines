@@ -10,7 +10,7 @@ router.get("/", async (req, res, next) => {
   try {
     const result = await oauth2.authorizationCode.getToken(tokenConfig)
     const accessToken = oauth2.accessToken.create(result);
-    res.cookie("accessToken", JSON.stringify(accessToken.token));
+    res.cookie("accessToken", JSON.stringify(accessToken.token), cookieOptions);
     res.render("loginRedirect");
   } catch (error) {
     console.log("Access Token Error", error.message);

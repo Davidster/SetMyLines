@@ -1,17 +1,3 @@
-let setAccessToken = (accessTokenObj) => {
-  document.cookie = `accessToken=${accessTokenObj}`;
-};
-
-let getCookieMap = () => {
-  let rawCookies = document.cookie.split(";");
-  let cookieMap = {};
-  rawCookies.forEach(rawCookie => {
-  	let asArray = rawCookie.trim().split("=");
-  	cookieMap[asArray[0]] = asArray[1];
-  });
-  return cookieMap;
-};
-
 let apiRequest = (options) => {
   return new Promise((resolve, reject) => {
     $.ajax(options).done((data) => {
@@ -23,14 +9,25 @@ let apiRequest = (options) => {
   });
 };
 
-let getTeams = async () => apiRequest({
+let getTeams = () => apiRequest({
   type: "GET",
   url: "/getTeams"
 });
 
-let getTeamRoster = async (teamKey) => apiRequest({
+let getTeamRoster = (teamKey) => apiRequest({
   type: "GET",
   url: `/getTeamRoster?teamKey=${teamKey}`
+});
+
+let getTeamRosterPost = (csrfToken) => apiRequest({
+  type: "POST",
+  url: `/getTeamRoster`,
+  headers: {
+    'CSRF-Token': csrfToken
+  },
+  data: {
+    hello: "wurld"
+  }
 });
 
 let buildTeamDivs = (teams) => {
@@ -49,18 +46,14 @@ let buildTeamDivs = (teams) => {
     let teamKey = $(e.target).parent().data("teamkey");
     let teamRoster = await getTeamRoster(teamKey);
     console.log(`Roster for team ${teamKey}:`, teamRoster);
+    let csrfToken = $("meta[name='csrf-token']").attr("content");
+    console.log("csrfToken:", csrfToken);
+    let teamRosterPost = await getTeamRosterPost(csrfToken);
+    console.log(`teamRosterPost:`, teamRosterPost);
   });
 };
 
 $(async () => {
-  // return console.log("Heylo wurld!");
-  let cookieMap = getCookieMap();
-  let accessTokenObj = cookieMap.accessToken;
-  if(!accessTokenObj && window.location.hostname !== "localhost") {
-    return window.location.replace("/login");
-  }
-  setAccessToken(accessTokenObj);
-
   let teams = await getTeams();
   console.log("/getTeams API call:", teams);
   buildTeamDivs(teams);
