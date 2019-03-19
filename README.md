@@ -22,8 +22,10 @@ Catch me livestreaming the development of this project on [Twitch](https://www.t
 - Create jscalc to estimate cost of website.
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
-- Create a fancy-ass frontend in React
-- Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES
+- ~Create a fancy-ass frontend in React.~ Serve frontend with S3 + CloudFront?, ~serve API with Lambda~
+- Clean up Teams.js and split it into multiple files
+- If the optimized lineup has the same value as the original, don't optimize.
+- **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
 
 ### Some cost estimation notes:
 

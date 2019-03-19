@@ -5,10 +5,11 @@ const { verifyIDToken } = require("../requester");
 router.get("/", async (req, res, next) => {
   try {
     await verifyIDToken(JSON.parse(req.cookies.accessToken).id_token);
-    res.render("index", { title: "Yahoo Fantasy Automation", csrfToken: req.csrfToken() });
+    res.status(200).send(JSON.stringify({
+      csrfToken: req.csrfToken()
+    }));
   } catch (err) {
-    console.log("error in index:", err);
-    res.redirect("/login");
+    res.status(401).send();
   }
 });
 

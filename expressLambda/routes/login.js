@@ -3,7 +3,7 @@ var router = express.Router();
 
 router.get("/", (req, res, next) => {
   res.redirect(oauth2.authorizationCode.authorizeURL({
-    redirect_uri: `https://${process.env.OAUTH_DOMAIN}/loginCallback`,
+    redirect_uri: `https://${process.env.OAUTH_DOMAIN}/api/loginCallback`,
     scope: "openid fspt-w"
   }));
 });

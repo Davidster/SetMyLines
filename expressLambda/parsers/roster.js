@@ -17,6 +17,7 @@ module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) =>
   $lsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $lsDoc(statCategory);
     let statID = $statCategory.find("stat_id").text();
+    let statValue = 0;
     $statModifiers.each((i, statModifier) => {
       let $statModifier = $lsDoc(statModifier);
       if(statID === $statModifier.find("stat_id").text()) {
@@ -40,7 +41,7 @@ module.exports.parseTeamRoster = ($trDoc) => {
   $trDoc("player").each((i, player) =>{
     let $player = $trDoc(player);
     playerInfoSub[$player.find("player_key").text()] = {
-      selectedPos: $player.find("selected_position position").text(),
+      currentPosition: $player.find("selected_position position").text(),
       startingStatus: $player.find("starting_status > is_starting").text() || undefined
     };
   });

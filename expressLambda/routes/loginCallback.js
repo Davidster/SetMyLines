@@ -5,13 +5,13 @@ var router = express.Router();
 router.get("/", async (req, res, next) => {
   const tokenConfig = {
     code: req.query.code,
-    redirect_uri: `https://${process.env.OAUTH_DOMAIN}/loginCallback`
+    redirect_uri: `https://${process.env.OAUTH_DOMAIN}/api/loginCallback`
   };
   try {
     const result = await oauth2.authorizationCode.getToken(tokenConfig)
     const accessToken = oauth2.accessToken.create(result);
     res.cookie("accessToken", JSON.stringify(accessToken.token), cookieOptions);
-    res.render("loginRedirect");
+    res.redirect("/");
   } catch (error) {
     console.log("Access Token Error", error.message);
     res.send("Login Error");

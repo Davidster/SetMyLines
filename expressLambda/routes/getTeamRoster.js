@@ -25,10 +25,16 @@ let batchPlayerStatsRequests = (playerKeys, accessToken, res) => {
   return batchPromises;
 };
 
+let simplePlayerMapping = player => ({
+  position: player.currentPosition,
+  name: player.name,
+  moved: player.moved
+});
+
 router.get("/", async (req, res, next) => {
   // parse request
   let accessToken = JSON.parse(req.cookies.accessToken);
-  let date = undefined || moment().tz("America/New_York").format("YYYY-MM-DD");
+  let date = req.query.date || moment().tz("America/New_York").format("YYYY-MM-DD");
 
   // define yahoo queries
   let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
@@ -39,7 +45,7 @@ router.get("/", async (req, res, next) => {
   let gameKey = teamKey.split(".")[0];
   let gameSettingsQuery = `game/${gameKey}/stat_categories`;
 
-  let allPlayerInfo, optimizationResults = {};
+  let statIDMap = {}, optimizedLineups = {}, playerInfoMap = {}, originalLineup = [], requests = [];
   try {
     // fire nhl daily schedule request first since we don't need the access token
     let nhlDailyScheduleReqPromise = rp(dailyScheduleReq);
@@ -54,7 +60,7 @@ router.get("/", async (req, res, next) => {
     // perform yahoo queries
     let playerInfoSub = {};
 
-    let requests = await Promise.all([
+    requests = await Promise.all([
       requester(teamRosterQuery, accessToken, res).then($trDoc => {
         playerInfoSub = parseTeamRoster($trDoc);
         return Promise.all(batchPlayerStatsRequests(Object.keys(playerInfoSub), accessToken, res));
@@ -66,31 +72,46 @@ router.get("/", async (req, res, next) => {
 
     // parse query results
     let dailyGameMap = parseNhlDailySchedule(JSON.parse(requests[1]));
-    let statIDMap = parseGameSettings(requests[2]);
+    statIDMap = parseGameSettings(requests[2]);
     let positionCapacityMap = {};
     // this function mutates the statIDMap and positionCapacityMap objects
     parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
-    allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap);
+    let allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap);
 
+    // optimize linuep against some stat categories
     let aggregateStatCategories = [
       "averageFanPoints",
       "totalFanPoints"
     ];
     for(let i = 0; i < aggregateStatCategories.length; i++) {
       let category = aggregateStatCategories[i];
-      optimizationResult = await optimizeLineupByAttribute(allPlayerInfo, category, positionCapacityMap, false);
-      optimizationResults[category] = optimizationResult;
+      let optimizedLineup = await optimizeLineupByAttribute(allPlayerInfo, category, positionCapacityMap, true);
+      optimizedLineups[category] = optimizedLineup.map(simplePlayerMapping);
     }
+
+    // format output
+    playerInfoMap = allPlayerInfo.reduce((acc, player) => {
+      acc[player.name] = player;
+      return acc;
+    }, {});
+    originalLineup = allPlayerInfo.map(simplePlayerMapping);
 
   } catch (err) {
     console.log("Error getting team roster:", err);
+    console.log("Raw Yahoo responses:");
+    console.log("player stats document:", requests[0] && requests[0].html());
+    console.log("nhl daily schedule document:", requests[1] && requests[1].html());
+    console.log("game settings document:", requests[2] && requests[2].html());
+    console.log("league settings document:", requests[3] && requests[3].html());
     return res.status(500).send();
   }
 
   // return results to client
   res.send(JSON.stringify({
-    players: allPlayerInfo,
-    optimizationResults: optimizationResults
+    playerInfoMap: playerInfoMap,
+    originalLineup: originalLineup,
+    optimizedLineups: optimizedLineups,
+    statIDMap: statIDMap
   }));
 });
 

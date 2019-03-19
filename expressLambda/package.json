@@ -9,6 +9,7 @@
     "local": "node scripts/local"
   },
   "dependencies": {
+    "@material-ui/core": "^3.9.2",
     "aws-sdk": "^2.415.0",
     "aws-serverless-express": "^3.3.3",
     "cheerio": "^1.0.0-rc.2",

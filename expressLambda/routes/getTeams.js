@@ -9,7 +9,8 @@ const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
 router.get("/", async (req, res, next) => {
   try {
     let $teamDoc = await requester(TEAMS_QUERY, JSON.parse(req.cookies.accessToken), res, true);
-    res.send(JSON.stringify(parseTeamDoc($teamDoc)));
+    let teamsArray = parseTeamDoc($teamDoc).sort((a,b)=>(b.leagueYear-a.leagueYear)).filter(league=>league.leagueGameCode==="nhl");
+    res.send(JSON.stringify(teamsArray));
   } catch(err) {
     console.log(err);
     res.status(500).send();

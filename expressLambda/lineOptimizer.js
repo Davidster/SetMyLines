@@ -14,15 +14,28 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   rawPlayersArray = JSON.parse(JSON.stringify(rawPlayersArray));
   positionCapacityMap = JSON.parse(JSON.stringify(positionCapacityMap));
 
+  let positions = Object.keys(positionCapacityMap).filter(position=>position.indexOf("IR") === -1);
+  // If the league includes a Util spot, add Util to position list of all non-goalie players
+  if(positions.indexOf("Util") >= 0) {
+    rawPlayersArray.forEach(player => {
+      if(player.eligiblePosList.indexOf("G") === -1) {
+        player.eligiblePosList.push("Util");
+      }
+    });
+  }
+
   let playerMap = rawPlayersArray.reduce((acc, player)=>{ acc[player.name] = player; return acc; }, {});
-  let filteredPlayers = rawPlayersArray.map(player => ({
+  let remappedPlayers = rawPlayersArray.map(player => ({
     name: player.name,
-    currentPosition: player.selectedPos,
+    currentPosition: player.currentPosition,
     posList: player.eligiblePosList,
     value: player.aggregateStats[valueAttribute],
     hasGameToday: !!player.todaysGame,
     unhealthy: !!player.status
-  })).sort((a,b)=>(b.value-a.value)).filter(player => player.currentPosition.indexOf("IR") === -1);
+  }));
+  let filteredPlayers = JSON.parse(JSON.stringify(remappedPlayers))
+                         .sort((a,b)=>(b.value-a.value))
+                         .filter(player => player.currentPosition.indexOf("IR") === -1);
   // make sure goalies who are officially starting are prioritized over those who are not by marking them as unhealthy
   filteredPlayers.forEach(player => {
     if(player.posList.length === 1 && player.posList[0] === "G") {
@@ -30,16 +43,6 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     }
   });
 
-
-  let positions = Object.keys(positionCapacityMap).filter(position=>position.indexOf("IR") === -1);
-  // If the league includes a Util spot, add Util to position list of all non-goalie players
-  if(positions.indexOf("Util") >= 0) {
-    filteredPlayers.forEach(player => {
-      if(player.posList.indexOf("G") === -1) {
-        player.posList.push("Util");
-      }
-    });
-  }
   let activePositions = positions.filter(pos=>pos!=="BN");
 
   let totalInputValue = 0, inputLog = [];
@@ -56,20 +59,8 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
 
   // if the league has no bench position, do nothing. just reformat the input array as a map
   if(positionCapacityMap["BN"] === undefined) {
-    outputBins = filteredPlayers.reduce((acc, player) => {
-      acc[player.currentPosition] = [];
-      return acc;
-    }, {});
-    filteredPlayers.forEach(player => {
-      outputBins[player.currentPosition].push(player);
-    });
-    return outputBins;
+    return remappedPlayers;
   }
-
-  /*
-    Add all players without a game to the bench
-  */
-  outputBins["BN"] = outputBins["BN"].concat(playersWithoutGame);
 
   /*
     Find positions for which all eligible players only have
@@ -79,7 +70,7 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     and the rest into the bench.
   */
   let exclusivePositions = activePositions.filter(pos => (
-    !healthyPlayersWithGame.some(player => (
+    !playersWithGame.some(player => (
       player.posList.indexOf(pos) >= 0) ?
         (player.posList.length !== 1) : false
     )
@@ -106,10 +97,6 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   if(allNepPlayers.length > 0) {
     await performMaxFlowMinCost(allNepPlayers, nonExclusivePositions, positionCapacityMap, outputBins);
   }
-  // update the remaining position capacities
-  positions.forEach(pos => {
-    positionCapacityMap[pos] -= outputBins[pos].length;
-  });
 
   /*
     Perform maxFlowMinCost again for unhealthy players
@@ -117,12 +104,64 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     ensure that an unhealthy player never takes precedence
     over a healthy one
   */
+  let remainingPosCapMap = {};
+  positions.forEach(pos => {
+    remainingPosCapMap[pos] = positionCapacityMap[pos] - outputBins[pos].length;
+  });
   let unhealthyNepPlayersWithGame = unhealthyPlayersWithGame.filter(player => {
     return player.posList.some(pos=>nonExclusivePositions.indexOf(pos)>=0);
   });
   if(unhealthyNepPlayersWithGame.length > 0) {
-    await performMaxFlowMinCost(unhealthyNepPlayersWithGame, nonExclusivePositions, positionCapacityMap, outputBins);
+    await performMaxFlowMinCost(unhealthyNepPlayersWithGame, nonExclusivePositions, remainingPosCapMap, outputBins);
   }
+
+  // For all remaining roster spots, try to place the players back to their original positions so as to minimize
+  // the roster difference. this will improve the quality of the animation on the frontend.
+  playersWithoutGame.forEach(player => {
+    let wasPushedIntoBin = [player.currentPosition].concat(player.posList).some(pos => {
+      let binIsFull = positionCapacityMap[pos] - outputBins[pos].length === 0;
+      if(!binIsFull) {
+        outputBins[pos].push(player);
+        return true;
+      }
+    });
+    if(!wasPushedIntoBin) {
+      outputBins["BN"].push(player);
+    }
+  });
+
+  let movedPlayers = remappedPlayers.filter((player, i) => {
+    if(player.currentPosition.indexOf("IR") >= 0) {
+      player.newPosition = player.currentPosition;
+      return false;
+    }
+    let newPosition = Object.keys(outputBins).find(position => {
+      return outputBins[position].some(subPlayer=>subPlayer.name===player.name);
+    });
+    player.newPosition = newPosition;
+    return newPosition !== player.currentPosition;
+  });
+  remappedPlayers = remappedPlayers.map(player => {
+    if(movedPlayers.some(movedPlayer=>movedPlayer.name===player.name)) {
+      return { currentPosition: player.currentPosition };
+    }
+    return player;
+  });
+  movedPlayers.forEach(movedPlayer => {
+    let foundSpot = remappedPlayers.some((player, i) => {
+      if(!player.name && player.currentPosition === movedPlayer.newPosition) {
+        remappedPlayers[i] = movedPlayer;
+        return true;
+      }
+    });
+    if(!foundSpot) {
+      remappedPlayers.push(movedPlayer);
+    }
+  });
+  movedPlayers.forEach(movedPlayer => {
+    movedPlayer.moved = true;
+    movedPlayer.currentPosition = movedPlayer.newPosition;
+  });
 
   if(debug) {
     inputLog.push("Input:");
@@ -158,7 +197,7 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     }
   }
 
-  return outputBins;
+  return remappedPlayers;
 };
 
 /*

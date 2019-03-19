@@ -9,9 +9,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const csrfProtection = csrf({ cookie: true });
-const indexRouter = require("./routes/index");
+const verifyTokenRouter = require("./routes/verifyToken");
 const loginRouter = require("./routes/login");
 const loginCallbackRouter = require("./routes/loginCallback");
+const logoutRouter = require("./routes/logout");
 const getTeams = require("./routes/getTeams");
 const getTeamRoster = require("./routes/getTeamRoster");
 
@@ -56,12 +57,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", csrfProtection, indexRouter);
-app.use("/login", csrfProtection, loginRouter);
-app.use("/loginCallback", csrfProtection, loginCallbackRouter);
-app.use("/getTeams", csrfProtection, getTeams);
-app.use("/getTeamRoster", csrfProtection, getTeamRoster);
-
+app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
+app.use("/api/login", csrfProtection, loginRouter);
+app.use("/api/loginCallback", csrfProtection, loginCallbackRouter);
+app.use("/api/logout", csrfProtection, logoutRouter);
+app.use("/api/getTeams", csrfProtection, getTeams);
+app.use("/api/getTeamRoster", csrfProtection, getTeamRoster);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
