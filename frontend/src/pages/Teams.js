@@ -84,7 +84,8 @@ class Teams extends Component {
       toolbarOpen: true,
       selectedDate: moment().tz(SERVER_TIME_ZONE),
       loggedIn: true,
-      loading: ""
+      loading: "",
+      disableRosterAnimation: false
     };
     console.log(this.state);
     this.validateToken().then(() => {
@@ -151,12 +152,18 @@ class Teams extends Component {
 
   handleTeamClick = (teamKey) => {
     this.setState({
+      disableRosterAnimation: true,
       activeTeamKey: teamKey
     });
     if(this.teamRosters[teamKey]) {
       this.setState({
         roster: this.teamRosters[teamKey]
       });
+      setTimeout(() => {
+        this.setState({
+          disableRosterAnimation: false
+        });
+      }, 1000);
     } else {
       this.setState({
         loading: "Loading team roster"
@@ -168,6 +175,11 @@ class Teams extends Component {
           roster: roster,
           loading: ""
         });
+        setTimeout(() => {
+          this.setState({
+            disableRosterAnimation: false
+          });
+        }, 1000);
       }).catch(err => {
         this.setState({
           loading: ""
@@ -267,7 +279,7 @@ class Teams extends Component {
               </TableRow>
             </TableHead>
             <TableBody className="tableBody">
-              <FlipMove typeName={null} duration={750}>
+              <FlipMove typeName={null} duration={750} disableAllAnimations={this.state.disableRosterAnimation}>
                 {lineup.filter(player=>!!player.name).map((player, i) => (
                   <TableRow key={player.name} className={`rosterTableItem ${player.moved ? "moved" : ""} ${player.position==="BN" ? "bench" : ""}`}>
                     <TableCell>{player.position}</TableCell>
