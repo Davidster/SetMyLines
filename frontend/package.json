@@ -13,6 +13,7 @@
     "moment-timezone": "^0.5.23",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
+    "react-flip-move": "^3.0.3",
     "react-scripts": "2.1.8"
   },
   "scripts": {

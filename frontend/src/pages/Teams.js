@@ -41,6 +41,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import FlipMove from "react-flip-move";
 import $ from "jquery";
 import "./Teams.css";
 
@@ -250,7 +251,7 @@ class Teams extends Component {
           <FormHelperText>Select stat to optimize against</FormHelperText>
         </FormControl>
         {this.renderRosterStatTotals(lineup, playerInfoMap)}
-        <Paper>
+        <Paper className="rosterTableBackground">
           <Table>
             <TableHead>
               <TableRow>
@@ -265,37 +266,39 @@ class Teams extends Component {
                 <TableCell>Health Status</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {lineup.map((player, i) => (
-                <TableRow key={i} className={`rosterTableItem ${player.moved ? "moved" : ""} ${player.position==="BN" ? "bench" : ""}`}>
-                  <TableCell>{player.position}</TableCell>
-                  {player.name && (
-                    <>
-                      <TableCell className="playerInfoCell">
-                        <div className="playerInfoCellSub">
-                          <Avatar className="playerInfoImage" alt={player.name} src={playerInfoMap[player.name].imageUrl} />
-                          <div className="playerInfoText">
-                            <div className="name">{player.name}</div>
-                            <div className="posList">{playerInfoMap[player.name].eligiblePosList.join(" ")}</div>
+            <TableBody className="tableBody">
+              <FlipMove typeName={null} duration={750}>
+                {lineup.filter(player=>!!player.name).map((player, i) => (
+                  <TableRow key={player.name} className={`rosterTableItem ${player.moved ? "moved" : ""} ${player.position==="BN" ? "bench" : ""}`}>
+                    <TableCell>{player.position}</TableCell>
+                    {player.name && (
+                      <>
+                        <TableCell className="playerInfoCell">
+                          <div className="playerInfoCellSub">
+                            <Avatar className="playerInfoImage" alt={player.name} src={playerInfoMap[player.name].imageUrl} />
+                            <div className="playerInfoText">
+                              <div className="name">{player.name}</div>
+                              <div className="posList">{playerInfoMap[player.name].eligiblePosList.join(" ")}</div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      {AGGREGATE_STAT_COLUMNS.map(column => {
-                        let value = playerInfoMap[player.name].aggregateStats[column.attribName];
-                        return (value === undefined) ? <td>N/A</td> : (
-                          <TableCell key={column.name}>{value.toFixed(2)}</TableCell>
-                        )
-                      })}
-                      <TableCell className={`${!!playerInfoMap[player.name].todaysGame ? "green" : "red"}`}>
-                        {!!playerInfoMap[player.name].todaysGame ? "Yes" : "No"}
-                      </TableCell>
-                      <TableCell className={`${playerInfoMap[player.name].status ? "red" : "green"}`}>
-                        {playerInfoMap[player.name].status || "Healthy"}
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
+                        </TableCell>
+                        {AGGREGATE_STAT_COLUMNS.map(column => {
+                          let value = playerInfoMap[player.name].aggregateStats[column.attribName];
+                          return (value === undefined) ? <td>N/A</td> : (
+                            <TableCell key={column.name}>{value.toFixed(2)}</TableCell>
+                          )
+                        })}
+                        <TableCell className={`${!!playerInfoMap[player.name].todaysGame ? "green" : "red"}`}>
+                          {!!playerInfoMap[player.name].todaysGame ? "Yes" : "No"}
+                        </TableCell>
+                        <TableCell className={`${playerInfoMap[player.name].status ? "red" : "green"}`}>
+                          {playerInfoMap[player.name].status || "Healthy"}
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </FlipMove>
             </TableBody>
           </Table>
         </Paper>

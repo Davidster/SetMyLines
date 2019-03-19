@@ -189,6 +189,17 @@
   text-align: center;
 }
 
+.rosterTableContainer table th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+}
+
+.rosterTableBackground {
+  overflow-y: auto;
+  height: 600px;
+}
+
 .rosterTableContainer .statTotalItem {
   padding: 8px;
 }
@@ -241,6 +252,7 @@
 
 .playerInfoCellSub .playerInfoImage {
   margin: 4px 0;
+  position: static;
 }
 
 .playerInfoText {
