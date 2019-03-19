@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
 const dotenv = require("dotenv");
+const cache = require("memory-cache");
 dotenv.config();
 
 const csrfProtection = csrf({ cookie: true });
@@ -45,11 +46,34 @@ const credentials = {
 // Initialize the OAuth2 Library
 oauth2 = require("simple-oauth2").create(credentials);
 
+// use in-memory cache if running locally to improve development speed
+let memCache = new cache.Cache();
+let cacheMiddleware = (duration) => {
+  return (req, res, next) => {
+    if(process.env.RUN_LOCAL === undefined) {
+      next();
+    } else {
+      let key =  "__express__" + req.originalUrl || req.url;
+      let cacheContent = memCache.get(key);
+      if(cacheContent){
+        res.send(cacheContent);
+        return;
+      } else {
+        res.sendResponse = res.send;
+        res.send = (body) => {
+          memCache.put(key,body,duration*1000);
+          res.sendResponse(body)
+        }
+        next();
+      }
+    }
+  }
+}
+
 const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "hbs");
 
 app.use(logger("common"));
 app.use(express.json());
@@ -61,8 +85,8 @@ app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
 app.use("/api/login", csrfProtection, loginRouter);
 app.use("/api/loginCallback", csrfProtection, loginCallbackRouter);
 app.use("/api/logout", csrfProtection, logoutRouter);
-app.use("/api/getTeams", csrfProtection, getTeams);
-app.use("/api/getTeamRoster", csrfProtection, getTeamRoster);
+app.use("/api/getTeams", csrfProtection, cacheMiddleware(3600), getTeams);
+app.use("/api/getTeamRoster", csrfProtection, cacheMiddleware(3600), getTeamRoster);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
