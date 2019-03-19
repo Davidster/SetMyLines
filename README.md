@@ -2,6 +2,10 @@
 
 Catch me livestreaming the development of this project on [Twitch](https://www.twitch.tv/dhuckz).
 
+Feel free to test this site and give feedback at https://setmylines.com.
+At the time of writing this, the site cannot make any changes to your Yahoo account or any of your teams/leagues and your access token is only stored in a browser cookie on your own computer. 
+**None of your rosters/lineups will be changed and I will not be able to interact with the Yahoo API on your behalf.**
+
 ## TODO
 
 - ~FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))~
