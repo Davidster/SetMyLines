@@ -3,7 +3,7 @@
 Catch me livestreaming the development of this project on [Twitch](https://www.twitch.tv/dhuckz).
 
 Feel free to test this site and give feedback at https://setmylines.com.
-At the time of writing this, the site cannot make any changes to your Yahoo account or any of your teams/leagues and your access token is only stored in a browser cookie on your own computer. 
+At the time of writing this, the site cannot make any changes to your Yahoo account or any of your teams/leagues and your access token is only stored in a browser cookie on your own computer.
 **None of your rosters/lineups will be changed and I will not be able to interact with the Yahoo API on your behalf.**
 
 ## TODO
@@ -27,6 +27,7 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - UX design
 - ~Create a fancy-ass frontend in React.~ Serve frontend with S3 + CloudFront?, ~serve API with Lambda~
+- add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
 - Clean up Teams.js and split it into multiple files
 - If the optimized lineup has the same value as the original, don't optimize.
 - **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
