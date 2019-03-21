@@ -37,6 +37,7 @@
   overflow-x: hidden;
   border-right: 1px solid rgba(0, 0, 0, 0.12);
   position: fixed;
+  z-index: 1;
 }
 
 .root .drawer .drawerHead {
@@ -193,6 +194,7 @@
   position: sticky;
   top: 0;
   background-color: white;
+  z-index: 1;
 }
 
 .rosterTableBackground {
