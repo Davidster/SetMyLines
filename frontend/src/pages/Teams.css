@@ -37,7 +37,7 @@
   overflow-x: hidden;
   border-right: 1px solid rgba(0, 0, 0, 0.12);
   position: fixed;
-  z-index: 1;
+  z-index: 2;
 }
 
 .root .drawer .drawerHead {
