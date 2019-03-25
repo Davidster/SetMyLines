@@ -4,7 +4,7 @@
   "config": {
     "s3BucketName": "setmylinesbucket",
     "region": "us-east-1",
-    "cloudFormationStackName": "AwsServerlessExpressStack",
+    "cloudFormationStackName": "SetMyLines",
     "functionName": "SetMyLinesAPIHandler",
     "accountId": "171337445867"
   },

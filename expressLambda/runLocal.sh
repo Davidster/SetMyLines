@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-RUN_LOCAL=true node app.local.js
+USER_INFO_TABLE_NAME=SetMyLinesUserInfo RUN_LOCAL=true node app.local.js

@@ -1,8 +1,9 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
+const asyncMiddleware = require("./asyncMiddleware");
 
 /* GET home page. */
-router.get("/", async (req, res, next) => {
+router.get("/", asyncMiddleware(async (req, res, next) => {
   const tokenConfig = {
     code: req.query.code,
     redirect_uri: `https://${process.env.OAUTH_DOMAIN}/api/loginCallback`
@@ -16,6 +17,6 @@ router.get("/", async (req, res, next) => {
     console.log("Access Token Error", error.message);
     res.send("Login Error");
   }
-});
+}));
 
 module.exports = router;

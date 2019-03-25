@@ -1,9 +1,10 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
+const asyncMiddleware = require("./asyncMiddleware");
 
-router.get("/", (req, res, next) => {
+router.get("/", asyncMiddleware(async (req, res, next) => {
   res.clearCookie("accessToken");
   res.redirect("/");
-});
+}));
 
 module.exports = router;

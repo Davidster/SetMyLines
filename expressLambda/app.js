@@ -14,8 +14,9 @@ const verifyTokenRouter = require("./routes/verifyToken");
 const loginRouter = require("./routes/login");
 const loginCallbackRouter = require("./routes/loginCallback");
 const logoutRouter = require("./routes/logout");
-const getTeams = require("./routes/getTeams");
-const getTeamRoster = require("./routes/getTeamRoster");
+const teams = require("./routes/teams");
+const teamRoster = require("./routes/teamRoster");
+const subscriptions = require("./routes/subscriptions");
 
 cookieOptions = {
   httpOnly: true
@@ -50,12 +51,13 @@ oauth2 = require("simple-oauth2").create(credentials);
 let memCache = new cache.Cache();
 let cacheMiddleware = (duration) => {
   return (req, res, next) => {
-    if(process.env.RUN_LOCAL === undefined) {
+    if(!process.env.LOCAL_CACHE) {
       next();
     } else {
-      let key =  "__express__" + req.originalUrl || req.url;
+      let key = `__express__${(req.originalUrl || req.url)}`;
       let cacheContent = memCache.get(key);
-      if(cacheContent){
+      if(req.method === "GET" && cacheContent){
+        console.log("Cache hit for key: ", key);
         res.send(cacheContent);
         return;
       } else {
@@ -85,8 +87,9 @@ app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
 app.use("/api/login", csrfProtection, loginRouter);
 app.use("/api/loginCallback", csrfProtection, loginCallbackRouter);
 app.use("/api/logout", csrfProtection, logoutRouter);
-app.use("/api/getTeams", csrfProtection, cacheMiddleware(3600), getTeams);
-app.use("/api/getTeamRoster", csrfProtection, cacheMiddleware(3600), getTeamRoster);
+app.use("/api/teams", csrfProtection, cacheMiddleware(3600), teams);
+app.use("/api/teamRoster", csrfProtection, cacheMiddleware(3600), teamRoster);
+app.use("/api/subscriptions", csrfProtection, subscriptions);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -101,7 +104,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.send(res.locals.message);
 });
 
 module.exports = app;

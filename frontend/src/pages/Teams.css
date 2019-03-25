@@ -61,8 +61,8 @@
   text-align: center;
 }
 
-.root .drawer .leagueNameText {
-  display: inline;
+.root .drawer .leagueYearText {
+  color: rgba(0, 0, 0, 0.54);
 }
 
 .root .drawer .paper {

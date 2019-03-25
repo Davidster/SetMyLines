@@ -34,11 +34,11 @@ let verifyIDToken = async (idToken) => {
   });
 };
 
-let refreshTokenIfNeeded = async (accessToken, res) => {
+let refreshTokenIfNeeded = async (accessToken, expressResponse) => {
   // refresh the token if needed
   const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
   const expirationWindowStart = expirationTimeInSeconds - EXPIRATION_WINDOW_IN_SECONDS;
-  const nowInSeconds = (new Date()).getTime() / 1000;
+  const nowInSeconds = new Date().getTime() / 1000;
   const shouldRefresh = nowInSeconds >= expirationWindowStart;
   if (shouldRefresh) {
     console.log("Token expired. Refreshing");
@@ -47,12 +47,14 @@ let refreshTokenIfNeeded = async (accessToken, res) => {
       ...newAccessToken.token,
       id_token: accessToken.id_token
     };
-    res.cookie("accessToken", JSON.stringify(accessToken), cookieOptions);
+    if(expressResponse) {
+      expressResponse.cookie("accessToken", JSON.stringify(accessToken), cookieOptions);
+    }
   }
   return accessToken;
 };
 
-module.exports.requester = async (query, accessToken, res, verifyID = false, enableLogs = true) => {
+let requester = async (query, rpOptions, accessToken, expressResponse, verifyID = false, enableLogs = true) => {
   if(enableLogs) {
     console.log(`Making request to /${query.split(";")[0]}`);
   }
@@ -71,7 +73,7 @@ module.exports.requester = async (query, accessToken, res, verifyID = false, ena
   }
 
   try {
-    accessToken = await refreshTokenIfNeeded(accessToken, res);
+    accessToken = await refreshTokenIfNeeded(accessToken, expressResponse);
   } catch (err) {
     if(enableLogs) {
       console.log("Error refreshing access token");
@@ -81,8 +83,7 @@ module.exports.requester = async (query, accessToken, res, verifyID = false, ena
 
   // make signed request to Yahoo
   try {
-
-    let response = await rp({ url: `${API_BASE_URL}${query}`, headers: { authorization: `Bearer ${accessToken.access_token}` } });
+    let response = await rp({ ...rpOptions, url: `${API_BASE_URL}${query}`, headers: { ...rpOptions.headers, authorization: `Bearer ${accessToken.access_token}` }});
     return cheerio.load(response);
   } catch(err) {
     if(enableLogs) {
@@ -91,5 +92,7 @@ module.exports.requester = async (query, accessToken, res, verifyID = false, ena
     throw err;
   }
 };
+
+module.exports.requester = requester;
 module.exports.refreshTokenIfNeeded = refreshTokenIfNeeded;
 module.exports.verifyIDToken = verifyIDToken;

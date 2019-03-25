@@ -13,7 +13,7 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~Fix roster download script so it does all queries in parallel instead of 1 at a time~
 - ~Figure out how to use yahoo API to update roster~
 - ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
-- ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~ Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
+- ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~
 - ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
 - ~Clean out all code that was used to deploy the app to a VPS~
 - ~Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda~
@@ -21,15 +21,21 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~Upgrade python version in lambda to 3.x instead of 2.7~
 - ~Figure out how to run app locally~
 - ~Read up about csrf and figure out how to mitigate this issue in my use case. Cookies should be set to use "httponly" and "secure". When a user visits the website, read a csrf token from the database and send it back to the client for him to include in all write requests. Ideally this csrf token should be changed regularly, maybe once per day (maybe use dynamodb timeToLive)~
-- Add DynamoDB table to hold user info.
-- Add CloudWatch events to perform roster updates on regular basis
-- Create jscalc to estimate cost of website.
-- Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
-- UX design
-- ~Create a fancy-ass frontend in React.~ Serve frontend with S3 + CloudFront?, ~serve API with Lambda~
-- add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
+- ~Add DynamoDB table to hold user info.~
+- ~If the optimized lineup has the same value as the original, don't optimize.~
+- ~Create a fancy-ass frontend in React.~
+- ~serve API with Lambda~
+- ~add PUT /api/teamRoster endpoint which will actually update the team roster.~
+- Add CloudWatch events + lambda handler to perform roster updates on regular basis. lambda handler will simply invoke the expressLambda function and mimic a client PUT request to /api/teamRoster
 - Clean up Teams.js and split it into multiple files
-- If the optimized lineup has the same value as the original, don't optimize.
+- Add frontend for subscription and roster-update features
+- Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
+- Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
+- Verify if express in lambda is correctly (not) caching the index.html document
+- Serve frontend with S3 + CloudFront?
+- Create jscalc to estimate cost of website.
+- Xreate express middleware which verifies the ID token and extracts user info out of it
+- Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
 - **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
 
 ### Some cost estimation notes:

@@ -1,8 +1,8 @@
 const AWS = require("aws-sdk");
-const lambda = new AWS.Lambda({ apiVersion: "2015-03-31" });
+const lambda = new AWS.Lambda({ apiVersion: "2015-03-31", region: "us-east-1" });
 const path = require("path");
 const { exec } = require("child_process");
-const MFMC_SCRIPT_PATH = path.resolve(__dirname, "../maxFlowLambda/lambda.py");
+const MFMC_SCRIPT_PATH = path.resolve(__dirname, "../../maxFlowLambda/lambda.py");
 
 /*
   valueAttribute is the attribute on the player object that we wish to optimize in maxflow,
@@ -130,6 +130,44 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     }
   });
 
+  inputLog.push("Input:");
+  positions.forEach(pos => {
+    inputLog.push(`  ${pos}:`);
+    let players = filteredPlayers.filter(player=>player.currentPosition===pos);
+    players.forEach(player => {
+      inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
+        totalInputValue += player.value;
+      }
+    });
+  });
+
+  outputLog.push("Output:");
+  positions.forEach(pos => {
+    outputLog.push(`  ${pos}:`);
+    outputBins[pos].forEach(player => {
+      outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+      if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
+        totalOutputValue += player.value;
+      }
+    });
+  });
+  let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
+
+  if(debug) {
+    console.log("Total input value:", totalInputValue);
+    console.log("Total output value:", totalOutputValue);
+    console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
+    if(percentDifference < -0.001) {
+      console.log(inputLog.join("\n"));
+      console.log(outputLog.join("\n"));
+    }
+  }
+
+  if(Math.abs(percentDifference) < 0.1) {
+    return remappedPlayers;
+  }
+
   let movedPlayers = remappedPlayers.filter((player, i) => {
     if(player.currentPosition.indexOf("IR") >= 0) {
       player.newPosition = player.currentPosition;
@@ -162,40 +200,6 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     movedPlayer.moved = true;
     movedPlayer.currentPosition = movedPlayer.newPosition;
   });
-
-  if(debug) {
-    inputLog.push("Input:");
-    positions.forEach(pos => {
-      inputLog.push(`  ${pos}:`);
-      let players = filteredPlayers.filter(player=>player.currentPosition===pos);
-      players.forEach(player => {
-        inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-        if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
-          totalInputValue += player.value;
-        }
-      });
-    });
-
-    outputLog.push("Output:");
-    positions.forEach(pos => {
-      outputLog.push(`  ${pos}:`);
-      outputBins[pos].forEach(player => {
-        outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
-        if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
-          totalOutputValue += player.value;
-        }
-      });
-    });
-    let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
-
-    console.log("Total input value:", totalInputValue);
-    console.log("Total output value:", totalOutputValue);
-    console.log(`Percent difference: ${percentDifference.toFixed(2)}%`);
-    if(percentDifference < -0.001) {
-      console.log(inputLog.join("\n"));
-      console.log(outputLog.join("\n"));
-    }
-  }
 
   return remappedPlayers;
 };

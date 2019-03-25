@@ -88,14 +88,15 @@ class Teams extends Component {
       disableRosterAnimation: false
     };
     console.log(this.state);
-    this.validateToken().then(() => {
+    this.validateToken().then(tokenValidResponse => {
+      this.csrfToken = tokenValidResponse.csrfToken;
       this.setState({
         loading: "Loading your teams"
       });
-      this.getTeams().then(teams => {
-        console.log(teams);
+      this.getTeams().then(teamsResponse => {
+        console.log(teamsResponse);
         this.setState({
-          teams: teams,
+          teams: teamsResponse.teams,
           loading: ""
         });
       }).catch(err => {
@@ -116,7 +117,7 @@ class Teams extends Component {
   apiRequest = (options) => {
     return new Promise((resolve, reject) => {
       $.ajax(options).done((data) => {
-        resolve(JSON.parse(data));
+        resolve(data);
       }).catch((err) => {
         console.log("request error", err);
         reject(err);
@@ -126,12 +127,23 @@ class Teams extends Component {
 
   getTeams = () => this.apiRequest({
     type: "GET",
-    url: "/api/getTeams"
+    url: "/api/teams"
   });
 
   getTeamRoster = (teamKey, date) => this.apiRequest({
     type: "GET",
-    url: `/api/getTeamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
+    url: `/api/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
+  });
+
+  updateTeamRoster = (csrfToken, teamKey, roster, date) => this.apiRequest({
+    type: "PUT",
+    url: `/api/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: {
+      roster: roster
+    }
   });
 
   validateToken = () => this.apiRequest({
@@ -139,14 +151,20 @@ class Teams extends Component {
     url: "/api/verifyToken"
   });
 
-  getTeamRosterPost = (csrfToken) => this.apiRequest({
+  getSubscriptions = () => this.apiRequest({
+    type: "GET",
+    url: "/api/subscriptions"
+  });
+
+  addSubscription = (csrfToken, teamKey, stat) => this.apiRequest({
     type: "POST",
-    url: `/api/getTeamRoster`,
+    url: `/api/subscriptions`,
     headers: {
       "CSRF-Token": csrfToken
     },
     data: {
-      hello: "wurld"
+      teamKey: teamKey,
+      stat: stat
     }
   });
 
@@ -187,6 +205,16 @@ class Teams extends Component {
         window.alert("Error getting team roster. Reload page to retry");
       });
     }
+    this.addSubscription(this.csrfToken, teamKey, "averageFanPoints").then(res => {
+      console.log("addSubscription success:", res);
+      this.getSubscriptions().then(res => {
+        console.log("getSubscriptions success:", res);
+      }).catch(err => {
+        console.log("getSubscriptions error:", err);
+      });
+    }).catch(err => {
+      console.log("addSubscription error:", err);
+    });
   }
 
   handleOptimizationTypeClick = event => {
@@ -234,6 +262,19 @@ class Teams extends Component {
     return <span className={`diff ${color}`}>{sign}{diff.toFixed(2)}%</span>;
   };
 
+  handleApply = (lineup, playerInfoMap, date) => {
+    let roster = lineup.map(player => ({
+      playerKey: playerInfoMap[player.name].key,
+      position: player.position
+    }));
+    console.log("should call PUT /api/teamRoster with:", this.state.activeTeamKey, roster);
+    this.updateTeamRoster(this.csrfToken, this.state.activeTeamKey, roster, date).then(res => {
+      console.log("updateTeamRoster success", res);
+    }).catch(err => {
+      console.log("updateTeamRoster error", err);
+    });
+  };
+
   renderRosterList = (lineup, playerInfoMap, statIDMap, date) => {
     return (
       <>
@@ -262,6 +303,7 @@ class Teams extends Component {
           </Select>
           <FormHelperText>Select stat to optimize against</FormHelperText>
         </FormControl>
+        <Button onClick={() => { this.handleApply(lineup, playerInfoMap, date); }}>Apply</Button>
         {this.renderRosterStatTotals(lineup, playerInfoMap)}
         <Paper className="rosterTableBackground">
           <Table>
@@ -463,12 +505,10 @@ class Teams extends Component {
                   className="teamListItemText"
                   primary={team.teamName}
                   secondary={
-                    <>
-                      <Typography component="span" className="leagueNameText" color="textPrimary">
-                        {team.leagueName}
-                      </Typography>
-                      {` — ${team.leagueYear}`}
-                    </>
+                    <Typography color="textPrimary">
+                      {team.leagueName}
+                      <span className="leagueYearText">{` — ${team.leagueYear}`}</span> 
+                    </Typography>
                   }
                 />
                 <IconButton

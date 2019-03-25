@@ -1,0 +1,8 @@
+{
+  "name": "setmylines-subscription-lambda",
+  "version": "1.0.0",
+  "main": "lambda.js",
+  "dependencies": {
+    "aws-sdk": "^2.415.0"
+  }
+}
