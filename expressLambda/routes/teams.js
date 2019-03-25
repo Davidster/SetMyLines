@@ -1,9 +1,10 @@
+const path = require("path");
 const express = require("express");
 const router = express.Router();
-const { requester, refreshTokenIfNeeded } = require("../utils/requester");
-const { parseTeamDoc } = require("../parsers/team");
 const asyncMiddleware = require("./asyncMiddleware");
-// users;use_login=1/games;is_available=1;game_keys=nhl/leagues/teams
+const { parseTeamDoc } = require(path.join(process.env.COMMON_PATH, "parsers/team"));
+const { requester, refreshTokenIfNeeded } = require(path.join(process.env.COMMON_PATH, "requester"));
+
 const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
 
 router.get("/", asyncMiddleware(async (req, res, next) => {

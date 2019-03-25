@@ -2,6 +2,7 @@ const rp = require("request-promise");
 const cheerio = require("cheerio");
 const jwt = require("jsonwebtoken");
 const jwkToPem = require("jwk-to-pem");
+const oauth2 = require("./oauth2");
 
 const API_BASE_URL = "https://fantasysports.yahooapis.com/fantasy/v2/";
 const DISCOVERY_DOCUMENT_URL = "https://login.yahoo.com/.well-known/openid-configuration";

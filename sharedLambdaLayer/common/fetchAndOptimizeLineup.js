@@ -1,11 +1,11 @@
 const rp = require("request-promise");
 const moment = require("moment-timezone");
 const { requester, refreshTokenIfNeeded, verifyIDToken } = require("./requester");
-const { parseNhlDailySchedule } = require("../parsers/nhlDailySchedule");
+const { parseNhlDailySchedule } = require("./parsers/nhlDailySchedule");
 const { parseTeamRoster,
         parsePlayerStats,
         parseGameSettings,
-        parseLeagueSettings } = require("../parsers/roster");
+        parseLeagueSettings } = require("./parsers/roster");
 const { optimizeLineupByAttribute } = require("./lineOptimizer");
 const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
 

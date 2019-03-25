@@ -1,3 +1,5 @@
+process.env.COMMON_PATH = process.env.COMMON_PATH || "/opt/common";
+
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -5,8 +7,8 @@ const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
-const dotenv = require("dotenv");
 const cache = require("memory-cache");
+const dotenv = require("dotenv");
 dotenv.config();
 
 const csrfProtection = csrf({ cookie: true });
@@ -25,27 +27,6 @@ cookieOptions = {
 if(process.env.RUN_LOCAL === undefined) {
   cookieOptions.secure = true;
 }
-
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-if(!clientID || !clientSecret) {
-  console.log("missing client id or client secret");
-  process.exit(1);
-}
-// Set the configuration settings
-const credentials = {
-  client: {
-    id: clientID,
-    secret: clientSecret
-  },
-  auth: {
-    tokenHost: "https://api.login.yahoo.com",
-    authorizePath: "oauth2/request_auth",
-    tokenPath: "oauth2/get_token"
-  }
-};
-// Initialize the OAuth2 Library
-oauth2 = require("simple-oauth2").create(credentials);
 
 // use in-memory cache if running locally to improve development speed
 let memCache = new cache.Cache();

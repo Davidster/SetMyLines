@@ -153,6 +153,8 @@ Resources:
       Role: !GetAtt SetMyLinesLambdaRole.Arn
       Runtime: nodejs8.10
       Timeout: 30
+      Layers:
+        - !Ref SharedLambdaLayer
       Environment:
         Variables:
           MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
@@ -188,6 +190,13 @@ Resources:
       MemorySize: 1024
       Role: !GetAtt SubscriptionLambdaRole.Arn
       Runtime: nodejs8.10
+
+  SharedLambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: ./sharedLambdaLayer
+      CompatibleRuntimes:
+        - nodejs8.10
 
   SubscriptionTrigger:
     Type: AWS::Events::Rule

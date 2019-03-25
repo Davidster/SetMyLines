@@ -1,10 +1,10 @@
+const path = require("path");
 const express = require("express");
 const router = express.Router();
 const moment = require("moment-timezone");
-const cheerio = require("cheerio");
 const asyncMiddleware = require("./asyncMiddleware");
-const { fetchAndOptimizeLineup } = require("../utils/fetchAndOptimizeLineup");
-const { requester, verifyIDToken } = require("../utils/requester");
+const { requester, verifyIDToken } = require(path.join(process.env.COMMON_PATH, "requester"));
+const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "fetchAndOptimizeLineup"));
 
 let replaceAll = (str, find, replace) => {
   return str.replace(new RegExp(find, "g"), replace);
