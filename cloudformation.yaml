@@ -112,6 +112,22 @@ Resources:
             - logs:CreateLogStream
             - logs:PutLogEvents
             Resource: arn:aws:logs:*:*:*
+      - PolicyName: invokeMaxFlowLambda
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            Resource: !GetAtt MaxFlowMinCostHandler.Arn
+      - PolicyName: scanAllUserInfo
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:Scan
+            Resource: !GetAtt SetMyLinesUserInfo.Arn
 
   SetMyLinesApiGatewayExecutionPermission:
     Type: AWS::Lambda::Permission
@@ -159,6 +175,7 @@ Resources:
         Variables:
           MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
           USER_INFO_TABLE_NAME: !Ref SetMyLinesUserInfo
+          COMMON_PATH: "/opt/common"
       Events:
         ProxyApiRoot:
           Type: Api
@@ -188,8 +205,16 @@ Resources:
       CodeUri: ./subscriptionLambda
       Handler: lambda.handler
       MemorySize: 1024
+      Timeout: 900
       Role: !GetAtt SubscriptionLambdaRole.Arn
       Runtime: nodejs8.10
+      Layers:
+        - !Ref SharedLambdaLayer
+      Environment:
+        Variables:
+          MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
+          USER_INFO_TABLE_NAME: !Ref SetMyLinesUserInfo
+          COMMON_PATH: "/opt/common"
 
   SharedLambdaLayer:
     Type: AWS::Serverless::LayerVersion

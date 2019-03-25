@@ -35,4 +35,19 @@ router.post("/", asyncMiddleware(async (req, res, next) => {
   }
 }));
 
+router.delete("/", asyncMiddleware(async (req, res, next) => {
+  if(!req.body.teamKey) {
+    throw new Error("Missing request body param: teamKey");
+  }
+  let accessToken = JSON.parse(req.cookies.accessToken);
+  let userInfo = await verifyIDToken(accessToken.id_token);
+  try {
+    await userDAO.deleteSubscription(userInfo.sub, accessToken, req.body.teamKey, req.body.stat);
+    res.json({});
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error adding subscription");
+  }
+}))
+
 module.exports = router;

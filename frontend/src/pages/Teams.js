@@ -168,6 +168,17 @@ class Teams extends Component {
     }
   });
 
+  deleteSubscription = (csrfToken, teamKey) => this.apiRequest({
+    type: "DELETE",
+    url: `/api/subscriptions`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: {
+      teamKey: teamKey
+    }
+  });
+
   handleTeamClick = (teamKey) => {
     this.setState({
       disableRosterAnimation: true,
@@ -205,16 +216,25 @@ class Teams extends Component {
         window.alert("Error getting team roster. Reload page to retry");
       });
     }
-    this.addSubscription(this.csrfToken, teamKey, "averageFanPoints").then(res => {
-      console.log("addSubscription success:", res);
-      this.getSubscriptions().then(res => {
-        console.log("getSubscriptions success:", res);
-      }).catch(err => {
-        console.log("getSubscriptions error:", err);
-      });
+    this.getSubscriptions().then(res => {
+      console.log("getSubscriptions success:", res);
+      // if(!res[teamKey]) {
+      //   this.addSubscription(this.csrfToken, teamKey, "averageFanPoints").then(res => {
+      //     console.log("addSubscription success:", res);
+      //   }).catch(err => {
+      //     console.log("addSubscription error:", err);
+      //   });
+      // } else {
+      //   this.deleteSubscription(this.csrfToken, teamKey).then(res => {
+      //     console.log("deleteSubscription success:", res);
+      //   }).catch(err => {
+      //     console.log("deleteSubscription error:", err);
+      //   });
+      // }
     }).catch(err => {
-      console.log("addSubscription error:", err);
+      console.log("getSubscriptions error:", err);
     });
+
   }
 
   handleOptimizationTypeClick = event => {
@@ -507,7 +527,7 @@ class Teams extends Component {
                   secondary={
                     <Typography color="textPrimary">
                       {team.leagueName}
-                      <span className="leagueYearText">{` — ${team.leagueYear}`}</span> 
+                      <span className="leagueYearText">{` — ${team.leagueYear}`}</span>
                     </Typography>
                   }
                 />

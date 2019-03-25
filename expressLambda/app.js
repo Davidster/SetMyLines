@@ -1,15 +1,14 @@
-process.env.COMMON_PATH = process.env.COMMON_PATH || "/opt/common";
-
+const path = require("path");
 const createError = require("http-errors");
 const express = require("express");
-const path = require("path");
 const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
 const cache = require("memory-cache");
-const dotenv = require("dotenv");
-dotenv.config();
+
+// set environment variables defined in lambda layer
+require(path.join(process.env.COMMON_PATH, "setupEnvironment"));
 
 const csrfProtection = csrf({ cookie: true });
 const verifyTokenRouter = require("./routes/verifyToken");

@@ -5,10 +5,7 @@ const moment = require("moment-timezone");
 const asyncMiddleware = require("./asyncMiddleware");
 const { requester, verifyIDToken } = require(path.join(process.env.COMMON_PATH, "requester"));
 const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "fetchAndOptimizeLineup"));
-
-let replaceAll = (str, find, replace) => {
-  return str.replace(new RegExp(find, "g"), replace);
-};
+const rosterToXML = require(path.join(process.env.COMMON_PATH, "rosterToXML"));
 
 router.get("/", asyncMiddleware(async (req, res, next) => {
   try {
@@ -33,26 +30,9 @@ router.put("/", asyncMiddleware(async (req, res, next) => {
   let accessToken = JSON.parse(req.cookies.accessToken);
   let userInfo = await verifyIDToken(accessToken.id_token);
   try {
-    // convert roster array into xml request body,
-    let requestBody = `<?xml version="1.0"?>
-      <fantasy_content>
-        <roster>
-          <coverage_type>date</coverage_type>
-          <date>${req.query.date}</date>
-          <players>
-            ${req.body.roster.map(player => (`
-              <player>
-                <player_key>${player.playerKey}</player_key>
-                <position>${player.position}</position>
-              </player>
-            `)).join("")}
-          </players>
-        </roster>
-      </fantasy_content>`;
-    requestBody = replaceAll(requestBody, "\n", "");
     let rpOptions = {
       method: "PUT",
-      body: requestBody,
+      body: rosterToXML(req.body.roster, req.query.date),
       headers: { "Content-Type": "application/xml" }
     };
     await requester(`team/${req.query.teamKey}/roster`, rpOptions, accessToken, res);

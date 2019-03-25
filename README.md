@@ -26,7 +26,8 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~Create a fancy-ass frontend in React.~
 - ~serve API with Lambda~
 - ~add PUT /api/teamRoster endpoint which will actually update the team roster.~
-- Add CloudWatch events + lambda handler to perform roster updates on regular basis. lambda handler will simply invoke the expressLambda function and mimic a client PUT request to /api/teamRoster
+- ~move common sources into a shared Lambda Layer~
+- ~Add CloudWatch events + lambda handler to perform roster updates on regular basis.~
 - Clean up Teams.js and split it into multiple files
 - Add frontend for subscription and roster-update features
 - Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
