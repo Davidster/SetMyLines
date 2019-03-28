@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment-timezone");
 const asyncMiddleware = require("./asyncMiddleware");
-const { requester, verifyIDToken } = require(path.join(process.env.COMMON_PATH, "requester"));
-const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "fetchAndOptimizeLineup"));
-const rosterToXML = require(path.join(process.env.COMMON_PATH, "rosterToXML"));
+const { requester, verifyIDToken } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
+const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "yahoo/fetchAndOptimizeLineup"));
+const rosterToXML = require(path.join(process.env.COMMON_PATH, "yahoo/rosterToXML"));
 
 router.get("/", asyncMiddleware(async (req, res, next) => {
   try {
@@ -21,8 +21,8 @@ router.put("/", asyncMiddleware(async (req, res, next) => {
   if(!req.query.teamKey) {
     throw new Error("Missing request body param: teamKey");
   }
-  if(!req.body.roster) {
-    throw new Error("Missing request body param: roster");
+  if(!req.body.lineup) {
+    throw new Error("Missing request body param: lineup");
   }
   if(!req.query.date) {
     req.query.date = moment().tz("America/New_York").format("YYYY-MM-DD");
@@ -32,7 +32,7 @@ router.put("/", asyncMiddleware(async (req, res, next) => {
   try {
     let rpOptions = {
       method: "PUT",
-      body: rosterToXML(req.body.roster, req.query.date),
+      body: rosterToXML(req.body.lineup, req.query.date),
       headers: { "Content-Type": "application/xml" }
     };
     await requester(`team/${req.query.teamKey}/roster`, rpOptions, accessToken, res);

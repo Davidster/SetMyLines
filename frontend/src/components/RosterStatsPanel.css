@@ -1,0 +1,31 @@
+#root .statTotalsExpansionPanel {
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+#root .statTotalsExpansionPanel::before {
+  opacity: 0;
+}
+
+#root .statTotalsHeading {
+  flex-basis: 33.3%;
+  flex-shrink: 0;
+}
+
+#root .statTotalsSecHeading {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+#root .statTotalsExpansionDetails {
+  flex-direction: column;
+}
+
+.diff.positive {
+  color: #43a047;
+}
+.diff.negative {
+  color: #e53935;
+}
+.diff.neutral {
+  color: rgba(0, 0, 0, 0.54);
+}

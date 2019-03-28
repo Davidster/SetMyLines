@@ -1,3 +1,4 @@
+const uuidv4 = require("uuid/v4");
 const AWS = require("aws-sdk");
 const ddbConfig = { apiVersion: "2012-08-10", region: "us-east-1" };
 const dynamodb = new AWS.DynamoDB(ddbConfig);
@@ -28,7 +29,7 @@ let getUserItem = userID => {
       resolve(data.Item ? AWS.DynamoDB.Converter.unmarshall(data.Item) : undefined);
     });
   });
-}
+};
 
 let deleteUserItem = userID => {
   return new Promise((resolve, reject) => {
@@ -80,13 +81,14 @@ let deleteSubscription = async (userID, accessToken, teamKey, stat) => {
 
   delete userItem.subscriptionMap[teamKey];
 
+  // if the user no longer has any subscriptions, there is no need to keep the accessToken
   if(Object.keys(userItem.subscriptionMap).length === 0) {
-    await deleteUserItem(userID);
+    delete userItem.accessToken;
   } else {
     userItem.accessToken = accessToken;
-    userItem.lastUpdateTime = new Date().toString();
-    await putUserItem(userItem);
   }
+  userItem.lastUpdateTime = new Date().toString();
+  await putUserItem(userItem);
 };
 
 let getSubscriptions = async (userID) => {
@@ -97,7 +99,76 @@ let getSubscriptions = async (userID) => {
   return {};
 };
 
+let putEmail = async (userID, email) => {
+  let userItem = await getUserItem(userID);
+  if(!userItem) {
+    userItem = {
+      userID: userID
+    };
+  }
+  if(userItem.email && userItem.email.address === email) {
+    return userItem.email.isVerified;
+  }
+  userItem.email = {
+    address: email,
+    isVerified: false,
+    isEnabled: true,
+    verificationCode: uuidv4()
+  };
+  userItem.lastUpdateTime = new Date().toString();
+  await putUserItem(userItem);
+  return false;
+};
+
+let verifyEmail = async (userID, verificationCode) => {
+  let userItem = await getUserItem(userID);
+  if(!userItem || !userItem.email) {
+    return false;
+  }
+  if(userItem.email.verificationCode !== verificationCode) {
+    return false;
+  }
+  userItem.email.isVerified = true;
+  userItem.lastUpdateTime = new Date().toString();
+  await putUserItem(userItem);
+  return true;
+};
+
+let deleteEmail = async (userID, verificationCode) => {
+  let userItem = await getUserItem(userID);
+  if(!userItem || !userItem.email) {
+    return;
+  }
+  delete userItem.email;
+  userItem.lastUpdateTime = new Date().toString();
+  await putUserItem(userItem);
+};
+
+let enableEmail = async (userID, enable) => {
+  let userItem = await getUserItem(userID);
+  if(!userItem || !userItem.email) {
+    return;
+  }
+  userItem.email.isEnabled = enable;
+  userItem.lastUpdateTime = new Date().toString();
+  await putUserItem(userItem);
+};
+
+let getEmail = async userID => {
+  let userItem = await getUserItem(userID);
+  if(userItem && userItem.email) {
+    return userItem.email;
+  }
+  return {};
+};
+
+module.exports.getAllUsers = getAllUsers;
+module.exports.getFullUserItem = getUserItem;
 module.exports.putSubscription = putSubscription;
 module.exports.getSubscriptions = getSubscriptions;
 module.exports.deleteSubscription = deleteSubscription;
-module.exports.getAllUsers = getAllUsers;
+module.exports.putEmail = putEmail;
+module.exports.verifyEmail = verifyEmail;
+module.exports.deleteEmail = deleteEmail;
+module.exports.getEmail = getEmail;
+module.exports.enableEmail = enableEmail;

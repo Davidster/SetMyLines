@@ -35,14 +35,16 @@ let verifyIDToken = async (idToken) => {
   });
 };
 
-let refreshTokenIfNeeded = async (accessToken, expressResponse) => {
+let refreshTokenIfNeeded = async (accessToken, expressResponse, verbose = true) => {
   // refresh the token if needed
   const expirationTimeInSeconds = new Date(accessToken.expires_at).getTime() / 1000;
   const expirationWindowStart = expirationTimeInSeconds - EXPIRATION_WINDOW_IN_SECONDS;
   const nowInSeconds = new Date().getTime() / 1000;
   const shouldRefresh = nowInSeconds >= expirationWindowStart;
   if (shouldRefresh) {
-    console.log("Token expired. Refreshing");
+    if(verbose) {
+      console.log("Token expired. Refreshing");
+    }
     let newAccessToken = await oauth2.accessToken.create(accessToken).refresh();
     accessToken = {
       ...newAccessToken.token,
@@ -55,8 +57,8 @@ let refreshTokenIfNeeded = async (accessToken, expressResponse) => {
   return accessToken;
 };
 
-let requester = async (query, rpOptions, accessToken, expressResponse, verifyID = false, enableLogs = true) => {
-  if(enableLogs) {
+let requester = async (query, rpOptions, accessToken, expressResponse, verifyID = false, verbose = true) => {
+  if(verbose) {
     console.log(`Making request to /${query.split(";")[0]}`);
   }
 
@@ -66,7 +68,7 @@ let requester = async (query, rpOptions, accessToken, expressResponse, verifyID 
       let userInfo = await verifyIDToken(accessToken.id_token);
       // console.log(`ID token expires at ${new Date(userInfo.exp * 1000).toLocaleString()}`);
     } catch (err) {
-      if(enableLogs) {
+      if(verbose) {
         console.log("Error validating user id_token");
       }
       throw err;
@@ -74,9 +76,9 @@ let requester = async (query, rpOptions, accessToken, expressResponse, verifyID 
   }
 
   try {
-    accessToken = await refreshTokenIfNeeded(accessToken, expressResponse);
+    accessToken = await refreshTokenIfNeeded(accessToken, expressResponse, verbose);
   } catch (err) {
-    if(enableLogs) {
+    if(verbose) {
       console.log("Error refreshing access token");
     }
     throw err;
@@ -87,7 +89,7 @@ let requester = async (query, rpOptions, accessToken, expressResponse, verifyID 
     let response = await rp({ ...rpOptions, url: `${API_BASE_URL}${query}`, headers: { ...rpOptions.headers, authorization: `Bearer ${accessToken.access_token}` }});
     return cheerio.load(response);
   } catch(err) {
-    if(enableLogs) {
+    if(verbose) {
       console.log("Error performing yahoo request");
     }
     throw err;

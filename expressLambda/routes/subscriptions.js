@@ -2,8 +2,8 @@ const path = require("path");
 const express = require("express");
 const router = express.Router();
 const asyncMiddleware = require("./asyncMiddleware");
-const { verifyIDToken } = require(path.join(process.env.COMMON_PATH, "requester"));
-const userDAO = require(path.join(process.env.COMMON_PATH, "userDAO"));
+const { verifyIDToken } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
+const userDAO = require(path.join(process.env.COMMON_PATH, "user/userDAO"));
 
 router.get("/", asyncMiddleware(async (req, res, next) => {
   let accessToken = JSON.parse(req.cookies.accessToken);
@@ -48,6 +48,6 @@ router.delete("/", asyncMiddleware(async (req, res, next) => {
     console.log(err);
     throw new Error("Error adding subscription");
   }
-}))
+}));
 
 module.exports = router;

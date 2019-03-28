@@ -1,0 +1,86 @@
+.teamsListContainer {
+  display: none;
+  height: calc(100% - 32px);
+  margin: 16px;
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+.teamImage > img {
+  width: 112px;
+  height: 112px;
+}
+
+.rosterTableContainer {
+  min-width: 800px;
+}
+
+.rosterTableContainer .optimizationType {
+  display: inline-block;
+  padding: 8px;
+}
+
+.rosterTableContainer table {
+  border-spacing: 0;
+  text-align: center;
+}
+
+.rosterTableContainer table th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+}
+
+.rosterTableBackground {
+  overflow-y: auto;
+  height: 600px;
+}
+
+.rosterTableItem {
+  height: 50px;
+}
+
+.rosterTableItem.bench {
+  background-color: #DDDDDD;
+}
+
+.rosterTableItem.moved td {
+  font-weight: bold;
+}
+
+.rosterTableItem td.green {
+  color: #43a047;
+}
+
+.rosterTableItem td.red {
+  color: #e53935;
+}
+
+.playerInfoCell {
+  display: flex;
+}
+
+.playerInfoCell .playerInfoImage {
+  margin: 4px 0;
+  position: static;
+}
+
+.playerInfoText {
+  display: flex;
+  flex-direction: column;
+  margin: 0 8px;
+}
+
+.playerInfoText .name {
+  flex-grow: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.playerInfoText .posList {
+  flex-grow: 1;
+  font-size: 0.8em;
+  color: rgba(0, 0, 0, 0.54);
+  align-items: flex-start;
+}

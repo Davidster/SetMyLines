@@ -15,9 +15,10 @@ const verifyTokenRouter = require("./routes/verifyToken");
 const loginRouter = require("./routes/login");
 const loginCallbackRouter = require("./routes/loginCallback");
 const logoutRouter = require("./routes/logout");
-const teams = require("./routes/teams");
-const teamRoster = require("./routes/teamRoster");
-const subscriptions = require("./routes/subscriptions");
+const teamsRouter = require("./routes/teams");
+const teamRosterRouter = require("./routes/teamRoster");
+const subscriptionsRouter = require("./routes/subscriptions");
+const emailRouter = require("./routes/email");
 
 cookieOptions = {
   httpOnly: true
@@ -67,9 +68,10 @@ app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
 app.use("/api/login", csrfProtection, loginRouter);
 app.use("/api/loginCallback", csrfProtection, loginCallbackRouter);
 app.use("/api/logout", csrfProtection, logoutRouter);
-app.use("/api/teams", csrfProtection, cacheMiddleware(3600), teams);
-app.use("/api/teamRoster", csrfProtection, cacheMiddleware(3600), teamRoster);
-app.use("/api/subscriptions", csrfProtection, subscriptions);
+app.use("/api/teams", csrfProtection, cacheMiddleware(3600), teamsRouter);
+app.use("/api/teamRoster", csrfProtection, cacheMiddleware(3600), teamRosterRouter);
+app.use("/api/subscriptions", csrfProtection, subscriptionsRouter);
+app.use("/api/email", emailRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

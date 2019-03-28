@@ -28,15 +28,20 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~add PUT /api/teamRoster endpoint which will actually update the team roster.~
 - ~move common sources into a shared Lambda Layer~
 - ~Add CloudWatch events + lambda handler to perform roster updates on regular basis.~
-- Clean up Teams.js and split it into multiple files
+- ~Email change report~
+- Filter leagues that are not in the current year
+- ~Clean up Teams.js and split it into multiple files~
+- Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)
 - Add frontend for subscription and roster-update features
 - Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - Verify if express in lambda is correctly (not) caching the index.html document
+- Add exponential-delayed retry
 - Serve frontend with S3 + CloudFront?
 - Create jscalc to estimate cost of website.
-- Xreate express middleware which verifies the ID token and extracts user info out of it
+- Create express middleware which verifies the ID token and extracts user info out of it
 - Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
+- Come up with a better solution for log level rather than passing a verbose flag through a million functions...
 - **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
 
 ### Some cost estimation notes:

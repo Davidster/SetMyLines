@@ -1,0 +1,23 @@
+#root .appBar {
+  z-index: 1201;
+}
+
+#root .appBar .appBarTitle {
+  flex-grow: 1;
+  padding-left: 16px;
+}
+
+#root .appBar .appBarButton {
+  margin-right: 8px;
+}
+
+#root .appBar .toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+#root .appBar .toolbar .menuButton {
+  margin-left: 0px;
+  margin-right: 12px;
+}
