@@ -60,10 +60,10 @@ const emailVerificationLink = async (emailAddress, userID, verificationCode) => 
 // TODO: add exponential-delayed retry
 const sendEmailNotifications = async (allUserRosterUpdateResults) => {
   try {
-    let emaiSendResults = await Promise.all(allUserRosterUpdateResults.filter(
-      userRosterUpdateResults=>userRosterUpdateResults.user.email &&
-      userRosterUpdateResults=>userRosterUpdateResults.user.email.isEnabled &&
-      userRosterUpdateResults=>userRosterUpdateResults.user.email.isVerified
+    let emaiSendResults = await Promise.all(allUserRosterUpdateResults.filter(userRosterUpdateResults=>
+      userRosterUpdateResults.user.email &&
+      userRosterUpdateResults.user.email.isEnabled &&
+      userRosterUpdateResults.user.email.isVerified
     ).map(
       userRosterUpdateResults=>sendEmailNotificationPromise(userRosterUpdateResults)
     ));
