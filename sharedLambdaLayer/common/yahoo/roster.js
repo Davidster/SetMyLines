@@ -63,7 +63,7 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
         name: $player.find("name > full").text(),
         team: $player.find("editorial_team_full_name").text(),
         status: $player.find("status").text() || undefined,
-        imageUrl: $player.find("image_url").text() || undefined,
+        imageUrl: $player.find("url").text() || undefined,
         eligiblePosList: $player.find("eligible_positions > position").map((i,position)=>$psDoc(position).text()).get(),
         stats: $player.find("stats > stat").map((i, stat) => {
           let $stat = $psDoc(stat);
