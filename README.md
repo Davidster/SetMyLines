@@ -31,7 +31,8 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~Email change report~
 - Filter leagues that are not in the current year
 - ~Clean up Teams.js and split it into multiple files~
-- Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)
+- ~Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)~
+- ~Stop using window.location when following client side links, instead use history object or <Link> from [react router](https://reacttraining.com/react-router/web/api/location)~
 - Add frontend for subscription and roster-update features
 - Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time

@@ -138,7 +138,7 @@ class MainPage extends Component {
         <AppBar title={selectedTeamName ? selectedTeamName : "Select a team"}
                 //extraButtonText="Settings"
                 onHamburgerClick={this.handleDrawerToggle}
-                onExtraButtonClick={ () => { window.location.href = "/settings" }}/>
+                onExtraButtonClick={ () => { this.props.history.push("/settings") }}/>
         <TeamsDrawer teams={teams} open={toolbarOpen} onTeamClick={this.handleTeamClick}/>
         <div className={`content ${toolbarOpen ? "shift" : ""}`}>
           <div className="contentSpacer"></div>

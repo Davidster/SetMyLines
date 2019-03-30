@@ -43,7 +43,7 @@ class Settings extends Component {
       <>
         <AppBar title="Settings"
                 extraButtonText="Home"
-                onExtraButtonClick={ () => { window.location.href = "/" } }/>
+                onExtraButtonClick={ () => { this.props.history.push("/"); } }/>
         {loading ? <LoadingDialog text={loading}/> : (
           <div className="content">
             <div className="contentSpacer"></div>

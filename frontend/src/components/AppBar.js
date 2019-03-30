@@ -23,9 +23,7 @@ export default props => (
       {props.extraButtonText &&
         <Button className="appBarButton" color="inherit" onClick={props.onExtraButtonClick}>{props.extraButtonText}</Button>
       }
-      <Link to="/api/logout" className="bareLink">
-        <Button className="appBarButton" color="inherit">Logout</Button>
-      </Link>
+      <Button className="appBarButton" color="inherit" onClick={() => { window.location.replace("/api/logout") }}>Logout</Button>
     </Toolbar>
   </MuiAppBar>
 );

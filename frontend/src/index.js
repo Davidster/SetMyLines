@@ -44,7 +44,6 @@ class Root extends Component {
     this.state = {
       signedIn: false
     };
-    console.log("PATHNAME", window.location.pathname);
     if(pathRequiresAuthentication()) {
       Api.validateToken().then(() => {
         this.setState({ signedIn: true });

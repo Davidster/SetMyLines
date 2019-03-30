@@ -13,7 +13,7 @@ export default props => {
   // check if we are already logged
   Api.validateToken().then(() => {
     console.log("User is already signed in. Redirecting to main page.");
-    window.location.replace("/");
+    props.history.replace("/");
   }).catch(()=>{});
 
   return (

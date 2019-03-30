@@ -4,7 +4,7 @@ const asyncMiddleware = require("./asyncMiddleware");
 
 router.get("/", asyncMiddleware(async (req, res, next) => {
   res.clearCookie("accessToken");
-  res.redirect("/");
+  res.redirect("/login");
 }));
 
 module.exports = router;
