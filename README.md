@@ -33,11 +33,16 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - ~Clean up Teams.js and split it into multiple files~
 - ~Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)~
 - ~Stop using window.location when following client side links, instead use history object or <Link> from [react router](https://reacttraining.com/react-router/web/api/location)~
+- Check if league supports BN position and fanPoints calculation (as opposed to categories). If either are unsupported, backend should return an error.
+- Change daily roster parser to use seatgeek API; **write some scripts to check that team names correspond between Yahoo and seatgeek**
+- Make sure timezones are utilized properly everywhere....
 - Add frontend for subscription and roster-update features
+- When login fails, should redirect to login page and display a toast to the user
 - Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
 - Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
 - Verify if express in lambda is correctly (not) caching the index.html document
-- Add exponential-delayed retry
+- Add exponential-delayed retry to email sender
+- Investigate issue where player headshot images sometimes give 401 error. Make sure frontend responds gracefully when image url is invalid.
 - Serve frontend with S3 + CloudFront?
 - Create jscalc to estimate cost of website.
 - Create express middleware which verifies the ID token and extracts user info out of it

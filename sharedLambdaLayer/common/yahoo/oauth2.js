@@ -1,5 +1,5 @@
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
+const clientID = process.env.YAHOO_CLIENT_ID;
+const clientSecret = process.env.YAHOO_CLIENT_SECRET;
 if(!clientID || !clientSecret) {
   console.log("missing client id or client secret");
   process.exit(1);

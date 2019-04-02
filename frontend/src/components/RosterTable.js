@@ -53,7 +53,7 @@ export default props => {
                     </TableCell>
                     {aggregateStatCategories.map(category => {
                       let value = playerInfoMap[player.name].aggregateStats[category.name];
-                      return (value === undefined) ? <td>N/A</td> : (
+                      return (value === undefined || value === null) ? <td>N/A</td> : (
                         <TableCell key={category.prettyName}>{value.toFixed(2)}</TableCell>
                       )
                     })}

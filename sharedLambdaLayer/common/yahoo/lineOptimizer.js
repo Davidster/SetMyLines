@@ -18,7 +18,7 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   // If the league includes a Util spot, add Util to position list of all non-goalie players
   if(positions.indexOf("Util") >= 0) {
     rawPlayersArray.forEach(player => {
-      if(player.eligiblePosList.indexOf("G") === -1) {
+      if(player.eligiblePosList.indexOf("G") === -1 && player.eligiblePosList.indexOf("P") === -1) {
         player.eligiblePosList.push("Util");
       }
     });
@@ -118,7 +118,8 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   // For all remaining roster spots, try to place the players back to their original positions so as to minimize
   // the roster difference. this will improve the quality of the animation on the frontend.
   playersWithoutGame.forEach(player => {
-    let wasPushedIntoBin = [player.currentPosition].concat(player.posList).some(pos => {
+    let validPositions = player.posList.filter(pos=>positions.some(posi=>posi===pos));
+    let wasPushedIntoBin = [player.currentPosition].concat(validPositions).some(pos => {
       let binIsFull = positionCapacityMap[pos] - outputBins[pos].length === 0;
       if(!binIsFull) {
         outputBins[pos].push(player);
@@ -135,7 +136,7 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
     inputLog.push(`  ${pos}:`);
     let players = filteredPlayers.filter(player=>player.currentPosition===pos);
     players.forEach(player => {
-      inputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+      inputLog.push(`    name: ${player.name}, value: ${player.value ? player.value.toFixed(2) : player.value}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
       if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
         totalInputValue += player.value;
       }
@@ -146,13 +147,13 @@ module.exports.optimizeLineupByAttribute = async (rawPlayersArray, valueAttribut
   positions.forEach(pos => {
     outputLog.push(`  ${pos}:`);
     outputBins[pos].forEach(player => {
-      outputLog.push(`    name: ${player.name}, value: ${player.value.toFixed(2)}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
+      outputLog.push(`    name: ${player.name}, value: ${player.value ? player.value.toFixed(2) : player.value}, posList: ${player.posList.join(",")}, hasGame: ${player.hasGameToday}, unhealthy: ${player.unhealthy}`);
       if(pos !== "BN" && player.hasGameToday && !player.unhealthy) {
         totalOutputValue += player.value;
       }
     });
   });
-  let percentDifference = 100 * (totalOutputValue - totalInputValue) / totalInputValue;
+  let percentDifference = 100 * (totalOutputValue - totalInputValue) / (totalInputValue + 0.001);
 
   if(debug) {
     console.log("Total input value:", totalInputValue);

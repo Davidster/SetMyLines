@@ -11,7 +11,10 @@ router.get("/", asyncMiddleware(async (req, res, next) => {
   try {
     let $teamDoc = await requester(TEAMS_QUERY, {}, JSON.parse(req.cookies.accessToken), res, true);
     // TODO: filter leagues that are not in the current year
-    let teamsArray = parseTeamDoc($teamDoc).sort((a,b)=>(b.leagueYear-a.leagueYear)).filter(league=>league.leagueGameCode==="nhl");
+    let teamsArray = parseTeamDoc($teamDoc).sort((a,b)=>(b.leagueYear-a.leagueYear)).filter(league=>(
+      league.leagueGameCode==="mlb" ||
+      league.leagueGameCode==="nhl"
+    ));
     res.json({ teams: teamsArray });
   } catch(err) {
     console.log(err);

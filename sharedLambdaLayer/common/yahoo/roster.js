@@ -13,6 +13,7 @@ module.exports.parseGameSettings = ($gsDoc) => {
 };
 
 module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) => {
+  let gameCode = $lsDoc("game_code").first().text();
   let $statModifiers = $lsDoc("stat_modifiers stat");
   $lsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $lsDoc(statCategory);
@@ -34,6 +35,7 @@ module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) =>
     let $rosterPosition = $lsDoc(rosterPosition);
     positionCapacityMap[$rosterPosition.find("position").text()] = parseInt($rosterPosition.find("count").text());
   });
+  return gameCode;
 };
 
 module.exports.parseTeamRoster = ($trDoc) => {
@@ -54,8 +56,8 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
   // parse player info and stats
   $psDocs.forEach($psDoc => {
     $psDoc("player").each((i, player) => {
-
       let $player = $psDoc(player);
+      let $playerStats = $player.find("player_stats");
       let playerKey = $player.find("player_key").text();
       allPlayerInfo.push({
         ...playerInfoSub[playerKey],
@@ -65,7 +67,7 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
         status: $player.find("status").text() || undefined,
         imageUrl: $player.find("url").text() || undefined,
         eligiblePosList: $player.find("eligible_positions > position").map((i,position)=>$psDoc(position).text()).get(),
-        stats: $player.find("stats > stat").map((i, stat) => {
+        stats: $playerStats.find("stats > stat").map((i, stat) => {
           let $stat = $psDoc(stat);
           let statID = $stat.find("stat_id").text();
           return {
@@ -84,11 +86,16 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
 
   // compute fan point values from stats
   allPlayerInfo = allPlayerInfo.map(playerInfo => {
-    let totalFps = calculateTotalFps(playerInfo);
-    let averageFps = totalFps / playerInfo.stats.filter(stat=>stat.displayName==="GP")[0].count;
+    let gamesPlayed = playerInfo.stats.filter(stat=>stat.displayName==="GP")[0].count;
+    let totalFps = 0, averageFps = 0;
+    if(gamesPlayed > 0) {
+      totalFps = calculateTotalFps(playerInfo);
+      averageFps = totalFps / gamesPlayed;
+    }
+    let todaysGame = dailyGameMap[Object.keys(dailyGameMap).find(team=>team.toLowerCase()===playerInfo.team.toLowerCase())];
     return {
       ...playerInfo,
-      todaysGame: dailyGameMap[playerInfo.team],
+      todaysGame: todaysGame,
       aggregateStats: {
         totalFanPoints: totalFps,
         averageFanPoints: averageFps,
@@ -102,6 +109,9 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
 let calculateTotalFps = (playerInfo) => {
   return playerInfo.stats.reduce((acc, stat) => {
     if(stat.enabled === "1") {
+      if(isNaN(parseFloat(stat.count)) || isNaN(parseFloat(stat.fanPointsPerUnit))) {
+        return acc;
+      }
       return acc + stat.count * stat.fanPointsPerUnit;
     }
     return acc;

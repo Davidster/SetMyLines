@@ -1,13 +1,22 @@
 const rp = require("request-promise");
 const moment = require("moment-timezone");
 const { requester, refreshTokenIfNeeded, verifyIDToken } = require("./requester");
-const { parseNhlDailySchedule } = require("./nhlDailySchedule");
+const { parseDailySchedule } = require("./dailySchedule");
 const { parseTeamRoster,
         parsePlayerStats,
         parseGameSettings,
         parseLeagueSettings } = require("./roster");
 const { optimizeLineupByAttribute } = require("./lineOptimizer");
-const NHL_DAILY_SCHEDULE_URL = "https://statsapi.web.nhl.com/api/v1/schedule";
+const SEATGEEK_URL = `https://api.seatgeek.com/2/events?per_page=500`;
+const DAILY_SCHEDULE_URL = `https://api.seatgeek.com/2/events?` + [
+  ["client_id", process.env.SEATGEEK_CLIENT_ID],
+  ["client_secret", process.env.SEATGEEK_CLIENT_SECRET],
+  ["taxonomies.id", "1010100"], // MLB Baseball
+  ["taxonomies.id", "1020100"], // NFL Football
+  ["taxonomies.id", "1030100"], // NBA Basketball
+  ["taxonomies.id", "1040100"], // NHL Hockey
+  ["per_page", "500"]           // 500 results per page
+].map(item=>`${item[0]}=${item[1]}`).join("&");
 
 const aggregateStatCategories = [
   {
@@ -106,10 +115,12 @@ let addStatTotals = resultObject => {
 };
 
 module.exports.fetchAndOptimizeLineup = async (teamKey, date, accessToken, expressResponse, verbose = true) => {
-  date = date || moment().tz("America/New_York").format("YYYY-MM-DD");
+  // TODO: double check this timezone logic
+  date = date || moment().tz("UTC").format("YYYY-MM-DDTHH:mm:ss");
+  let oneDayLater = moment(date).add(1, "day").format("YYYY-MM-DDTHH:mm:ss");
 
   // define yahoo queries
-  let dailyScheduleReq = { url: `${NHL_DAILY_SCHEDULE_URL}?date=${date}` };
+  let dailyScheduleReq = { url: `${DAILY_SCHEDULE_URL}&datetime_utc.gt=${date}&datetime_utc.lt=${oneDayLater}` };
   let teamRosterQuery = `team/${teamKey}/roster;date=${date}`;
   let leagueKey = teamKey.split(".").slice(0,3).join(".");
   let leagueSettingsQuery = `league/${leagueKey}/settings`;
@@ -118,8 +129,8 @@ module.exports.fetchAndOptimizeLineup = async (teamKey, date, accessToken, expre
 
   let statIDMap = {}, optimizedLineups = {}, playerInfoMap = {}, originalLineup = [], requests = [];
   try {
-    // fire nhl daily schedule request first since we don't need the access token
-    let nhlDailyScheduleReqPromise = rp(dailyScheduleReq);
+    // fire daily schedule request first since we don't need the user's access token
+    let dailyScheduleReqPromise = rp(dailyScheduleReq);
 
     // prepare access token
     let tokenCheckResults = await Promise.all([
@@ -136,18 +147,18 @@ module.exports.fetchAndOptimizeLineup = async (teamKey, date, accessToken, expre
         playerInfoSub = parseTeamRoster($trDoc);
         return Promise.all(batchPlayerStatsRequests(Object.keys(playerInfoSub), accessToken, expressResponse, verbose));
       }),
-      nhlDailyScheduleReqPromise,
+      dailyScheduleReqPromise,
       requester(gameSettingsQuery, {}, accessToken, expressResponse, false, verbose),
       requester(leagueSettingsQuery, {}, accessToken, expressResponse, false, verbose),
     ]);
 
     // parse query results
-    let dailyGameMap = parseNhlDailySchedule(JSON.parse(requests[1]));
+    let dailyGameMap = parseDailySchedule(JSON.parse(requests[1]));
     statIDMap = parseGameSettings(requests[2]);
     let positionCapacityMap = {};
     // this function mutates the statIDMap and positionCapacityMap objects
-    parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
-    let allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap);
+    let gameCode = parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
+    let allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap[gameCode]);
 
     // optimize linuep against some stat categories
     for(let i = 0; i < aggregateStatCategories.length; i++) {
@@ -168,11 +179,11 @@ module.exports.fetchAndOptimizeLineup = async (teamKey, date, accessToken, expre
     }
   } catch (err) {
     console.log("Error getting team roster:", err);
-    console.log("Raw Yahoo responses:");
-    console.log("player stats document:", requests[0] && requests[0].html());
-    console.log("nhl daily schedule document:", requests[1] && requests[1].html());
-    console.log("game settings document:", requests[2] && requests[2].html());
-    console.log("league settings document:", requests[3] && requests[3].html());
+    // console.log("Raw Yahoo responses:");
+    // console.log("player stats document:", requests[0] && requests[0].map(request=>request.html()));
+    // console.log("nhl daily schedule document:", requests[1]);
+    // console.log("game settings document:", requests[2] && requests[2].html());
+    // console.log("league settings document:", requests[3] && requests[3].html());
     throw new Error("Error fetching/optimizing linuep");
   }
 
