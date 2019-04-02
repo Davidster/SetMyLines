@@ -1,4 +1,4 @@
-# yahoo-fantasy-automation
+# Set My Lines
 
 Catch me livestreaming the development of this project on [Twitch](https://www.twitch.tv/dhuckz).
 
