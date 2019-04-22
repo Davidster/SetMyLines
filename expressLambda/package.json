@@ -4,9 +4,6 @@
   "main": "lambda.js",
   "scripts": {
     "start": "node app.local.js",
-    "config": "node ./scripts/configure.js",
-    "deconfig": "node ./scripts/deconfigure.js",
-    "local": "node scripts/local"
   },
   "dependencies": {
     "aws-serverless-express": "^3.3.3",
