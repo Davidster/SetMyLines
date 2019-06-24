@@ -8,7 +8,7 @@ const logger = require("morgan");
 const cache = require("memory-cache");
 
 // set environment variables defined in lambda layer
-require(path.join(process.env.COMMON_PATH, "setupEnvironment"));
+require(path.join(process.env.LIB_PATH, "setupEnvironment"));
 
 const csrfProtection = csrf({ cookie: true });
 const verifyTokenRouter = require("./routes/verifyToken");

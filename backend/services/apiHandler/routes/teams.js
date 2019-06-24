@@ -2,8 +2,8 @@ const path = require("path");
 const express = require("express");
 const router = express.Router();
 const asyncMiddleware = require("./asyncMiddleware");
-const { parseTeamDoc } = require(path.join(process.env.COMMON_PATH, "yahoo/team"));
-const { requester, refreshTokenIfNeeded } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
+const { parseTeamDoc } = require(path.join(process.env.LIB_PATH, "yahoo/team"));
+const { requester, refreshTokenIfNeeded } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
 
 const TEAMS_QUERY = "users;use_login=1/games/leagues/teams";
 

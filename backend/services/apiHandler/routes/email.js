@@ -4,9 +4,9 @@ const csrf = require("csurf");
 const csrfProtection = csrf({ cookie: true });
 const router = express.Router();
 const asyncMiddleware = require("./asyncMiddleware");
-const { emailVerificationLink } = require(path.join(process.env.COMMON_PATH, "user/emailer"));
-const userDAO = require(path.join(process.env.COMMON_PATH, "user/userDAO"));
-const { verifyIDToken } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
+const { emailVerificationLink } = require(path.join(process.env.LIB_PATH, "user/emailer"));
+const userDAO = require(path.join(process.env.LIB_PATH, "user/userDAO"));
+const { verifyIDToken } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
 
 router.get("/", csrfProtection, asyncMiddleware(async (req, res, next) => {
   let accessToken = JSON.parse(req.cookies.accessToken);

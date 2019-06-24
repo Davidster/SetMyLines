@@ -2,11 +2,11 @@ const path = require("path");
 const moment = require("moment-timezone");
 
 // set environment variables defined in lambda layer
-require(path.join(process.env.COMMON_PATH, "setupEnvironment"));
+require(path.join(process.env.LIB_PATH, "setupEnvironment"));
 
 const { performRosterUpdate } = require("./automaticRosterUpdater");
-const userDAO = require(path.join(process.env.COMMON_PATH, "user/userDAO"));
-const { sendEmailNotifications } = require(path.join(process.env.COMMON_PATH, "user/emailer"));
+const userDAO = require(path.join(process.env.LIB_PATH, "user/userDAO"));
+const { sendEmailNotifications } = require(path.join(process.env.LIB_PATH, "user/emailer"));
 
 exports.handler = async (event, context, callback) => {
   try {

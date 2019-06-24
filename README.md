@@ -49,6 +49,7 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
 - Come up with a better solution for log level rather than passing a verbose flag through a million functions...
 - **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
+- Make better use of SAM framework in python lambda by adding requirements.txt, making `cleanMaxFlowLambdaZip` and `packageMaxFlowLambda` scripts obsolete
 
 ### Some cost estimation notes:
 

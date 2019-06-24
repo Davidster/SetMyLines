@@ -2,7 +2,7 @@ const path = require("path");
 const express = require("express");
 const router = express.Router();
 const asyncMiddleware = require("./asyncMiddleware");
-const { verifyIDToken } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
+const { verifyIDToken } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
 
 router.get("/", async (req, res, next) => {
   try {

@@ -1,8 +1,8 @@
 const path = require("path");
-const { requester, verifyIDToken, refreshTokenIfNeeded } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
-const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "yahoo/fetchAndOptimizeLineup"));
-const rosterToXML = require(path.join(process.env.COMMON_PATH, "yahoo/rosterToXML"));
-const { parseTeamDoc } = require(path.join(process.env.COMMON_PATH, "yahoo/team"));
+const { requester, verifyIDToken, refreshTokenIfNeeded } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
+const { fetchAndOptimizeLineup } = require(path.join(process.env.LIB_PATH, "yahoo/fetchAndOptimizeLineup"));
+const rosterToXML = require(path.join(process.env.LIB_PATH, "yahoo/rosterToXML"));
+const { parseTeamDoc } = require(path.join(process.env.LIB_PATH, "yahoo/team"));
 
 let optimizeTeam = async (user, teamKey, date, accessToken, verbose) => {
   let stat = user.subscriptionMap[teamKey];

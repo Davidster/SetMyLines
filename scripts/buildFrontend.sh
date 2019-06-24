@@ -2,6 +2,6 @@
 
 cd frontend &&
 npm run build &&
-rm -rf ../expressLambda/public &&
-mv build ../expressLambda/public && 
+rm -rf ../backend/services/apiHandler/public &&
+mv build ../backend/services/apiHandler/public &&
 cd ..

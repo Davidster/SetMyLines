@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "lambda.js",
   "scripts": {
-    "start": "node app.local.js",
+    "start": "node app.local.js"
   },
   "dependencies": {
     "aws-serverless-express": "^3.3.3",

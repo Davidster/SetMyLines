@@ -163,7 +163,7 @@ Resources:
   SetMyLinesAPIHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./expressLambda
+      CodeUri: ./backend/services/apiHandler/
       Handler: lambda.handler
       MemorySize: 1024
       Role: !GetAtt SetMyLinesLambdaRole.Arn
@@ -175,7 +175,7 @@ Resources:
         Variables:
           MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
           USER_INFO_TABLE_NAME: !Ref SetMyLinesUserInfo
-          COMMON_PATH: "/opt/common"
+          LIB_PATH: "/opt/common"
       Events:
         ProxyApiRoot:
           Type: Api
@@ -193,7 +193,7 @@ Resources:
   MaxFlowMinCostHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./maxFlowLambda/lambda.zip
+      CodeUri: ./backend/services/maxFlow/lambda.zip
       Handler: lambda.handler
       MemorySize: 1024
       Role: !GetAtt MaxFlowLambdaRole.Arn
@@ -202,7 +202,7 @@ Resources:
   SubscriptionHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./subscriptionLambda
+      CodeUri: ./backend/services/rosterUpdaterJob/
       Handler: lambda.handler
       MemorySize: 1024
       Timeout: 900
@@ -214,7 +214,7 @@ Resources:
         Variables:
           MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
           USER_INFO_TABLE_NAME: !Ref SetMyLinesUserInfo
-          COMMON_PATH: "/opt/common"
+          LIB_PATH: "/opt/common"
 
   SharedLambdaLayer:
     Type: AWS::Serverless::LayerVersion
@@ -290,3 +290,6 @@ Outputs:
         - "#/apis/"
         - !Ref ApiGatewayApi
         - "/stages/prod"
+  UserInfoTableName:
+    Description: Envriroment variable USER_INFO_TABLE_NAME
+    Value: !Ref SetMyLinesUserInfo

@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment-timezone");
 const asyncMiddleware = require("./asyncMiddleware");
-const { requester, verifyIDToken } = require(path.join(process.env.COMMON_PATH, "yahoo/requester"));
-const { fetchAndOptimizeLineup } = require(path.join(process.env.COMMON_PATH, "yahoo/fetchAndOptimizeLineup"));
-const rosterToXML = require(path.join(process.env.COMMON_PATH, "yahoo/rosterToXML"));
+const { requester, verifyIDToken } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
+const { fetchAndOptimizeLineup } = require(path.join(process.env.LIB_PATH, "yahoo/fetchAndOptimizeLineup"));
+const rosterToXML = require(path.join(process.env.LIB_PATH, "yahoo/rosterToXML"));
 
 router.get("/", asyncMiddleware(async (req, res, next) => {
   try {
