@@ -22,7 +22,6 @@ Resources:
   ApiGatewayDomainName:
     Type: AWS::ApiGateway::DomainName
     Properties:
-      # CertificateArn: arn:aws:acm:us-east-1:171337445867:certificate/e2fb1e2f-79df-47bc-b576-a13956561337 # *setmylines.com
       CertificateArn: arn:aws:acm:us-east-1:171337445867:certificate/95b803fe-8a1b-4de9-98fd-cf8ca842311b # setmylines.com
       DomainName: setmylines.com
 
