@@ -92,7 +92,7 @@ module.exports.parsePlayerStats = ($psDocs, playerInfoSub, statIDMap, dailyGameM
       totalFps = calculateTotalFps(playerInfo);
       averageFps = totalFps / gamesPlayed;
     }
-    let todaysGame = dailyGameMap[Object.keys(dailyGameMap).find(team=>team.toLowerCase()===playerInfo.team.toLowerCase())];
+    let todaysGame = dailyGameMap && dailyGameMap[Object.keys(dailyGameMap).find(team=>team.toLowerCase()===playerInfo.team.toLowerCase())];
     return {
       ...playerInfo,
       todaysGame: todaysGame,

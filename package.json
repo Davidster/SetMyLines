@@ -29,6 +29,5 @@
     "type": "git",
     "url": "git+https://github.com/Davidster/yahoo-fantasy-automation.git"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
