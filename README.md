@@ -8,48 +8,48 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 
 ## TODO
 
-- ~FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))~
-- ~Verify JWT sent by client on each request. Also, check if token is expired and auto-refresh instead of exposing a /refreshToken API~
-- ~Fix roster download script so it does all queries in parallel instead of 1 at a time~
-- ~Figure out how to use yahoo API to update roster~
-- ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
-- ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~
-- ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
-- ~Clean out all code that was used to deploy the app to a VPS~
-- ~Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda~
-- ~Split getTeamRoster.js into two source files.. also clean up that code.. it is a :hankey: - show.~
-- ~Upgrade python version in lambda to 3.x instead of 2.7~
-- ~Figure out how to run app locally~
-- ~Read up about csrf and figure out how to mitigate this issue in my use case. Cookies should be set to use "httponly" and "secure". When a user visits the website, read a csrf token from the database and send it back to the client for him to include in all write requests. Ideally this csrf token should be changed regularly, maybe once per day (maybe use dynamodb timeToLive)~
-- ~Add DynamoDB table to hold user info.~
-- ~If the optimized lineup has the same value as the original, don't optimize.~
-- ~Create a fancy-ass frontend in React.~
-- ~serve API with Lambda~
-- ~add PUT /api/teamRoster endpoint which will actually update the team roster.~
-- ~move common sources into a shared Lambda Layer~
-- ~Add CloudWatch events + lambda handler to perform roster updates on regular basis.~
-- ~Email change report~
-- Filter leagues that are not in the current year
-- ~Clean up Teams.js and split it into multiple files~
-- ~Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)~
-- ~Stop using window.location when following client side links, instead use history object or <Link> from [react router](https://reacttraining.com/react-router/web/api/location)~
-- Check if league supports BN position and fanPoints calculation (as opposed to categories). If either are unsupported, backend should return an error.
-- Change daily roster parser to use seatgeek API; **write some scripts to check that team names correspond between Yahoo and seatgeek**
-- Make sure timezones are utilized properly everywhere....
-- Add frontend for subscription and roster-update features
-- When login fails, should redirect to login page and display a toast to the user
-- Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
-- Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
-- Verify if express in lambda is correctly (not) caching the index.html document
-- Add exponential-delayed retry to email sender
-- Investigate issue where player headshot images sometimes give 401 error. Make sure frontend responds gracefully when image url is invalid.
-- Serve frontend with S3 + CloudFront?
-- Create jscalc to estimate cost of website.
-- Create express middleware which verifies the ID token and extracts user info out of it
-- Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
-- Come up with a better solution for log level rather than passing a verbose flag through a million functions...
-- **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
-- Make better use of SAM framework in python lambda by adding requirements.txt, making `clean-maxflow` and `package-maxflow` scripts obsolete
+- [x] ~FIX SECURITY FLAW (see these: [1](https://auth0.com/docs/security/store-tokens), [2](https://auth0.com/docs/quickstart/webapp/nodejs/))~
+- [x] ~Verify JWT sent by client on each request. Also, check if token is expired and auto-refresh instead of exposing a /refreshToken API~
+- [x] ~Fix roster download script so it does all queries in parallel instead of 1 at a time~
+- [x] ~Figure out how to use yahoo API to update roster~
+- [x] ~Formalize problem as minimum-cost flow, then implement algorithm in polynomial time to solve it, as per this [response](https://cs.stackexchange.com/questions/104854/placing-items-into-compatible-bucket-types-to-find-an-optimal-total-value).~
+- [x] ~Create some tests to prove the performance of the bench-setting algorithm by downloading some sample lineups and optimizing them.~
+- [x] ~Create CloudFormation template as per this [example](https://github.com/awslabs/aws-serverless-express/tree/master/examples/basic-starter), allowing the site to be deployed completely serverless.~
+- [x] ~Clean out all code that was used to deploy the app to a VPS~
+- [x] ~Wrap maxflowmincost code into python lambda function, make sure it's callable from main express app lambda~
+- [x] ~Split getTeamRoster.js into two source files.. also clean up that code.. it is a :hankey: - show.~
+- [x] ~Upgrade python version in lambda to 3.x instead of 2.7~
+- [x] ~Figure out how to run app locally~
+- [x] ~Read up about csrf and figure out how to mitigate this issue in my use case. Cookies should be set to use "httponly" and "secure". When a user visits the website, read a csrf token from the database and send it back to the client for him to include in all write requests. Ideally this csrf token should be changed regularly, maybe once per day (maybe use dynamodb timeToLive)~
+- [x] ~Add DynamoDB table to hold user info.~
+- [x] ~If the optimized lineup has the same value as the original, don't optimize.~
+- [x] ~Create a fancy-ass frontend in React.~
+- [x] ~serve API with Lambda~
+- [x] ~add PUT /api/teamRoster endpoint which will actually update the team roster.~
+- [x] ~move common sources into a shared Lambda Layer~
+- [x] ~Add CloudWatch events + lambda handler to perform roster updates on regular basis.~
+- [x] ~Email change report~
+- [ ] Filter leagues that are not in the current year
+- [x] ~Clean up Teams.js and split it into multiple files~
+- [x] ~Add Read (Public): sdps-r scope to setmylines yahoo app (must delete + re-create). This will allow us to read the name of the user as per this [page](https://developer.yahoo.com/oauth2/guide/openid_connect/decode_id_token.html#decode-id-token-payload)~
+- [x] ~Stop using window.location when following client side links, instead use history object or <Link> from [react router](https://reacttraining.com/react-router/web/api/location)~
+- [ ] Check if league supports BN position and fanPoints calculation (as opposed to categories). If either are unsupported, backend should return an error.
+- [ ] Change daily roster parser to use seatgeek API; **write some scripts to check that team names correspond between Yahoo and seatgeek**
+- [ ] Make sure timezones are utilized properly everywhere....
+- [ ] Add frontend for subscription and roster-update features
+- [ ] When login fails, should redirect to login page and display a toast to the user
+- [ ] Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
+- [ ] Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
+- [ ] Verify if express in lambda is correctly (not) caching the index.html document
+- [ ] Add exponential-delayed retry to email sender
+- [ ] Investigate issue where player headshot images sometimes give 401 error. Make sure frontend responds gracefully when image url is invalid.
+- [ ] Serve frontend with S3 + CloudFront?
+- [ ] Create jscalc to estimate cost of website.
+- [ ] Create express middleware which verifies the ID token and extracts user info out of it
+- [ ] Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
+- [ ] Come up with a better solution for log level rather than passing a verbose flag through a million functions...
+- [ ] **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
+- [ ] Make better use of SAM framework in python lambda by adding requirements.txt, making `clean-maxflow` and `package-maxflow` scripts obsolete
 
 ### Some cost estimation notes:
 
