@@ -30,13 +30,13 @@ if(process.env.RUN_LOCAL === undefined) {
 
 // use in-memory cache if running locally to improve development speed
 let memCache = new cache.Cache();
-let cacheMiddleware = (duration) => {
+const cacheMiddleware = (duration) => {
   return (req, res, next) => {
     if(!process.env.LOCAL_CACHE) {
       next();
     } else {
-      let key = `__express__${(req.originalUrl || req.url)}`;
-      let cacheContent = memCache.get(key);
+      const key = `__express__${(req.originalUrl || req.url)}`;
+      const cacheContent = memCache.get(key);
       if(req.method === "GET" && cacheContent){
         console.log("Cache hit for key: ", key);
         res.send(cacheContent);
@@ -53,6 +53,14 @@ let cacheMiddleware = (duration) => {
   }
 }
 
+//use DEV_TOKEN env var for authentication on localhost
+const localAuthMiddleware = (req, res, next) => {
+  if(process.env.DEV_TOKEN) {
+    req.cookies.accessToken = process.env.DEV_TOKEN;
+  }
+  next();
+};
+
 const app = express();
 
 // view engine setup
@@ -61,8 +69,19 @@ app.set("views", path.join(__dirname, "views"));
 app.use(logger("common"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  credentials: true,
+  origin: [
+    new RegExp(`http://localhost:`),
+    // new RegExp(`\.${process.env.SITE_DOMAIN}$`)
+  ]
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+if(process.env.RUN_LOCAL) {
+  app.use(localAuthMiddleware);
+}
 
 app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
 app.use("/api/login", csrfProtection, loginRouter);

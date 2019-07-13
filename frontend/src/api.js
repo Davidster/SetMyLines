@@ -4,6 +4,7 @@ let csrfToken;
 
 let apiRequest = (options) => {
   return new Promise((resolve, reject) => {
+    options.url = `${process.env.REACT_APP_API_URL.slice(0, -1)}${options.url}`
     $.ajax(options).done((data) => {
       resolve(data);
     }).catch((err) => {

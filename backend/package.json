@@ -2,7 +2,7 @@
   "name": "setmylines-backend",
   "version": "1.0.0",
   "scripts": {
-    "local": "nodemon runLocal.js"
+    "local": "RUN_LOCAL=true nodemon runLocal.js"
   },
   "dependencies": {
     "aws-sdk": "^2.441.0",

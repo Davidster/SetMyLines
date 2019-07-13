@@ -4,7 +4,7 @@ const router = express.Router();
 const asyncMiddleware = require("./asyncMiddleware");
 const { verifyIDToken } = require(path.join(process.env.LIB_PATH, "yahoo/requester"));
 
-router.get("/", async (req, res, next) => {
+router.get("/", asyncMiddleware(async (req, res, next) => {
   try {
     await verifyIDToken(JSON.parse(req.cookies.accessToken).id_token);
     res.json({ csrfToken: req.csrfToken() });
@@ -12,6 +12,6 @@ router.get("/", async (req, res, next) => {
     console.log(err);
     res.status(401).send();
   }
-});
+}));
 
 module.exports = router;

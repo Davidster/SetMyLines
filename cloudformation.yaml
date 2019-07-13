@@ -292,3 +292,6 @@ Outputs:
   UserInfoTableName:
     Description: Envriroment variable USER_INFO_TABLE_NAME
     Value: !Ref SetMyLinesUserInfo
+  # WebsiteDomain:
+  #   Description: Evironment variable SITE_DOMAIN
+  #   Value: !GetAtt CloudFrontDistribution.DomainName
