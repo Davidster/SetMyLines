@@ -21,7 +21,8 @@
     "build-frontend": "./scripts/buildFrontend.sh",
     "package-maxflow": "cd backend/services/maxFlow && ./package.sh && cd ../../..",
     "clean-maxflow": "rm backend/services/maxFlow/lambda.zip",
-    "package-deploy": "npm run build-frontend && npm run package-maxflow && npm run package && npm run deploy && npm run clean-maxflow",
+    "deploy-backend": "npm run package-maxflow && npm run package && npm run deploy && npm run clean-maxflow",
+    "deploy-frontend": "cd frontend && npm run build-deploy && cd ..",
     "delete-stack": "aws cloudformation delete-stack --stack-name $npm_package_config_cloudFormationStackName --region $npm_package_config_region",
     "setup": "npm install && (aws s3api get-bucket-location --bucket $npm_package_config_s3BucketName --region $npm_package_config_region || npm run create-bucket) && npm run package-deploy"
   },
@@ -29,5 +30,7 @@
     "type": "git",
     "url": "git+https://github.com/Davidster/yahoo-fantasy-automation.git"
   },
-  "dependencies": {}
+  "dependencies": {
+    "aws-sdk": "^2.493.0"
+  }
 }

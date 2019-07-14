@@ -19,7 +19,7 @@
   "scripts": {
     "start": "REACT_APP_API_URL=http://localhost:3001/ react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "build-deploy": "cd scripts && ./buildAndDeploy.sh && cd ..",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { withRouter } from "react-router";
 
 import * as serviceWorker from "./serviceWorker";
 import * as Api from "./api";
@@ -18,12 +19,8 @@ import "./index.css";
 
 const theme = createMuiTheme({
   palette: {
-    primary: {
-      main: "#6001d2"
-    },
-    secondary: {
-      main: "#0179ff"
-    }
+    primary:   { main: "#6001d2" },
+    secondary: { main: "#0179ff" }
   },
 });
 
@@ -33,26 +30,30 @@ const UNAUTHENTICATED_PATHS = [
   "/unsubscribeEmail"
 ];
 
-const pathRequiresAuthentication = () => {
-  return UNAUTHENTICATED_PATHS.indexOf(window.location.pathname) < 0;
+const pathRequiresAuthentication = path => {
+  return UNAUTHENTICATED_PATHS.indexOf(path) < 0;
 };
 
-class Root extends Component {
+class Routes extends Component {
 
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       signedIn: false
     };
-    if(pathRequiresAuthentication()) {
-      Api.validateToken().then(() => {
-        this.setState({ signedIn: true });
-      }).catch(err => {
-        if(err.status === 401) {
-          console.log("validateToken responded with 401. redirecting to login page");
-          window.location.href = "/login";
-        }
+  }
+
+  checkIsLoggedIn = async () => {
+    await Api.validateToken();
+    this.setState({ signedIn: true });
+  };
+
+  componentDidMount() {
+    if(pathRequiresAuthentication(this.props.location.pathname)) {
+      this.checkIsLoggedIn().catch(err => {
         console.log(err);
+        console.log("Error authorizing user. Redirecting to login page");
+        this.props.history.replace("/login");
       });
     }
   }
@@ -60,19 +61,37 @@ class Root extends Component {
   render() {
     const { signedIn } = this.state;
     return (
-      <MuiThemeProvider theme={theme}>
-        <Router>
-        {(pathRequiresAuthentication() && !signedIn) ? (<>
-          <AppBar />
-          <LoadingDialog text="Verifying your identity" />
-        </>) : (<>
+      (pathRequiresAuthentication(this.props.location.pathname) && !signedIn) ? (<>
+        <AppBar />
+        <LoadingDialog text="Verifying your identity" />
+      </>) : (
+        <Switch>
           <Route path="/" exact component={MainPage} />
           <Route path="/settings" component={Settings} />
-          <Route path="/login" component={Login} />
+          <Route path="/login" component={()=><Login checkIsLoggedIn={this.checkIsLoggedIn}/>} />
           <Route path="/registerEmail" component={RegisterEmail} />
           <Route path="/verifyEmail" component={VerifyEmail} />
           <Route path="/unsubscribeEmail" component={UnsubscribeEmail} />
-        </>)}
+          <Route render={() => <Redirect to="/login"/>}/>
+        </Switch>
+      )
+    );
+  }
+};
+
+const RoutesWithRouter = withRouter(Routes);
+
+class Root extends Component {
+
+  constructor(props){
+    super(props);
+  }
+
+  render() {
+    return (
+      <MuiThemeProvider theme={theme}>
+        <Router>
+          <RoutesWithRouter/>
         </Router>
       </MuiThemeProvider>
     );

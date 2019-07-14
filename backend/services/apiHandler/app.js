@@ -12,21 +12,13 @@ require(path.join(process.env.LIB_PATH, "setupEnvironment"));
 
 const csrfProtection = csrf({ cookie: true });
 const verifyTokenRouter = require("./routes/verifyToken");
-const loginRouter = require("./routes/login");
+const loginUrlRouter = require("./routes/loginUrl");
 const loginCallbackRouter = require("./routes/loginCallback");
 const logoutRouter = require("./routes/logout");
 const teamsRouter = require("./routes/teams");
 const teamRosterRouter = require("./routes/teamRoster");
 const subscriptionsRouter = require("./routes/subscriptions");
 const emailRouter = require("./routes/email");
-
-cookieOptions = {
-  httpOnly: true
-};
-
-if(process.env.RUN_LOCAL === undefined) {
-  cookieOptions.secure = true;
-}
 
 // use in-memory cache if running locally to improve development speed
 let memCache = new cache.Cache();
@@ -53,18 +45,7 @@ const cacheMiddleware = (duration) => {
   }
 }
 
-//use DEV_TOKEN env var for authentication on localhost
-const localAuthMiddleware = (req, res, next) => {
-  if(process.env.DEV_TOKEN) {
-    req.cookies.accessToken = process.env.DEV_TOKEN;
-  }
-  next();
-};
-
 const app = express();
-
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
 
 app.use(logger("common"));
 app.use(express.json());
@@ -73,24 +54,29 @@ app.use(cors({
   credentials: true,
   origin: [
     new RegExp(`http://localhost:`),
-    // new RegExp(`\.${process.env.SITE_DOMAIN}$`)
+    "https://setmylines.com"
   ]
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
 
+// use DEV_TOKEN env var for authentication on localhost
 if(process.env.RUN_LOCAL) {
-  app.use(localAuthMiddleware);
+  app.use((req, res, next) => {
+    if(process.env.DEV_TOKEN) {
+      req.cookies.accessToken = process.env.DEV_TOKEN;
+    }
+    next();
+  });
 }
 
-app.use("/api/verifyToken", csrfProtection, verifyTokenRouter);
-app.use("/api/login", csrfProtection, loginRouter);
-app.use("/api/loginCallback", csrfProtection, loginCallbackRouter);
-app.use("/api/logout", csrfProtection, logoutRouter);
-app.use("/api/teams", csrfProtection, cacheMiddleware(3600), teamsRouter);
-app.use("/api/teamRoster", csrfProtection, cacheMiddleware(3600), teamRosterRouter);
-app.use("/api/subscriptions", csrfProtection, subscriptionsRouter);
-app.use("/api/email", emailRouter);
+app.use("/verifyToken", csrfProtection, verifyTokenRouter);
+app.use("/loginUrl", csrfProtection, loginUrlRouter);
+app.use("/loginCallback", loginCallbackRouter);
+app.use("/logout", logoutRouter);
+app.use("/teams", csrfProtection, cacheMiddleware(3600), teamsRouter);
+app.use("/teamRoster", csrfProtection, cacheMiddleware(3600), teamRosterRouter);
+app.use("/subscriptions", csrfProtection, subscriptionsRouter);
+app.use("/email", emailRouter);
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });

@@ -13,7 +13,7 @@ router.get("/", asyncMiddleware(async (req, res, next) => {
     res.json(lineups);
   } catch(err) {
     console.log(err);
-    return res.status(500).send();
+    throw new Error("Error getting team roster");
   }
 }));
 
@@ -39,7 +39,7 @@ router.put("/", asyncMiddleware(async (req, res, next) => {
     res.json({});
   } catch (err) {
     console.log(err);
-    throw new Error("Error updating roster");
+    throw new Error("Error updating team roster");
   }
 }));
 

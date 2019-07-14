@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import moment from "moment-timezone";
+import { Redirect } from "react-router-dom";
 
 import AppBar from "../components/AppBar";
 import TeamsDrawer from "../components/TeamsDrawer";
@@ -138,7 +139,7 @@ class MainPage extends Component {
         <AppBar title={selectedTeamName ? selectedTeamName : "Select a team"}
                 //extraButtonText="Settings"
                 onHamburgerClick={this.handleDrawerToggle}
-                onExtraButtonClick={ () => { this.props.history.push("/settings") }}/>
+                onExtraButtonClick={ () => { this.props.history.push("/settings"); }}/>
         <TeamsDrawer teams={teams} open={toolbarOpen} onTeamClick={this.handleTeamClick}/>
         <div className={`content ${toolbarOpen ? "shift" : ""}`}>
           <div className="contentSpacer"></div>

@@ -4,19 +4,37 @@ let csrfToken;
 
 let apiRequest = (options) => {
   return new Promise((resolve, reject) => {
-    options.url = `${process.env.REACT_APP_API_URL.slice(0, -1)}${options.url}`
-    $.ajax(options).done((data) => {
+    $.ajax({
+      ...options,
+      url: `${process.env.REACT_APP_API_URL.slice(0, -1)}${options.url}`,
+      xhrFields: { withCredentials: true }
+    }).done((data) => {
       resolve(data);
     }).catch((err) => {
-      console.log("request error", err);
+      // console.log("request error", err);
       reject(err);
     });
   });
 };
 
+let getLoginUrl = () => apiRequest({
+  type: "GET",
+  url: "/loginUrl"
+});
+
+let loginCallback = (code) => apiRequest({
+  type: "POST",
+  url: `/loginCallback?code=${code}`
+});
+
+let logout = () => apiRequest({
+  type: "POST",
+  url: "/logout"
+});
+
 let validateToken = () => apiRequest({
   type: "GET",
-  url: "/api/verifyToken"
+  url: "/verifyToken"
 }).then(tokenValidResponse => {
   csrfToken = tokenValidResponse.csrfToken;
   return tokenValidResponse;
@@ -24,17 +42,17 @@ let validateToken = () => apiRequest({
 
 let getTeams = () => apiRequest({
   type: "GET",
-  url: "/api/teams"
+  url: "/teams"
 });
 
 let getTeamRoster = (teamKey, date) => apiRequest({
   type: "GET",
-  url: `/api/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
+  url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
 });
 
 let updateTeamRoster = (teamKey, lineup, date) => apiRequest({
   type: "PUT",
-  url: `/api/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`,
+  url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`,
   headers: {
     "CSRF-Token": csrfToken
   },
@@ -45,12 +63,12 @@ let updateTeamRoster = (teamKey, lineup, date) => apiRequest({
 
 let getSubscriptions = () => apiRequest({
   type: "GET",
-  url: "/api/subscriptions"
+  url: "/subscriptions"
 });
 
 let addSubscription = (teamKey, stat) => apiRequest({
   type: "POST",
-  url: `/api/subscriptions`,
+  url: `/subscriptions`,
   headers: {
     "CSRF-Token": csrfToken
   },
@@ -62,7 +80,7 @@ let addSubscription = (teamKey, stat) => apiRequest({
 
 let deleteSubscription = (teamKey) => apiRequest({
   type: "DELETE",
-  url: `/api/subscriptions`,
+  url: `/subscriptions`,
   headers: {
     "CSRF-Token": csrfToken
   },
@@ -73,12 +91,12 @@ let deleteSubscription = (teamKey) => apiRequest({
 
 let getEmail = () => apiRequest({
   type: "GET",
-  url: "/api/email"
+  url: "/email"
 });
 
 let registerEmail = emailAddress => apiRequest({
   type: "POST",
-  url: `/api/email/register`,
+  url: `/email/register`,
   headers: {
     "CSRF-Token": csrfToken
   },
@@ -96,5 +114,8 @@ export {
   addSubscription,
   deleteSubscription,
   getEmail,
-  registerEmail
+  registerEmail,
+  getLoginUrl,
+  loginCallback,
+  logout
 };

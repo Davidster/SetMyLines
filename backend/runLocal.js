@@ -6,8 +6,7 @@ const cloudformation = new AWS.CloudFormation({ apiVersion: "2010-05-15" });
 
 const LIB_PATH = "./lib/common";
 const envVarToCfOutputMap = {
-  USER_INFO_TABLE_NAME: "UserInfoTableName",
-  // SITE_DOMAIN: "WebsiteDomain"
+  USER_INFO_TABLE_NAME: "UserInfoTableName"
 };
 
 const setupEnvVars = async () => {

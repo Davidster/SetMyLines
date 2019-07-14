@@ -5,11 +5,12 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Button from "@material-ui/core/Button";
-import { Link, NavLink } from "react-router-dom";
+import { withRouter } from "react-router";
+import { logout } from "../api";
 
 import "./AppBar.css";
 
-export default props => (
+export default withRouter(props => (
   <MuiAppBar position="fixed" color="primary" className="appBar">
     <Toolbar className="toolbar">
       {props.onHamburgerClick &&
@@ -23,7 +24,10 @@ export default props => (
       {props.extraButtonText &&
         <Button className="appBarButton" color="inherit" onClick={props.onExtraButtonClick}>{props.extraButtonText}</Button>
       }
-      <Button className="appBarButton" color="inherit" onClick={() => { window.location.replace("/api/logout") }}>Logout</Button>
+      <Button className="appBarButton" color="inherit" onClick={async () => {
+        await logout();
+        props.history.push("/login");
+      }}>Logout</Button>
     </Toolbar>
   </MuiAppBar>
-);
+));

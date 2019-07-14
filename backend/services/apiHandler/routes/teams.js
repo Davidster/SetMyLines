@@ -18,7 +18,7 @@ router.get("/", asyncMiddleware(async (req, res, next) => {
     res.json({ teams: teamsArray });
   } catch(err) {
     console.log(err);
-    res.status(500).send();
+    throw new Error("Error getting user's teams");
   }
 }));
 

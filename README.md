@@ -40,18 +40,19 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - [ ] When login fails, should redirect to login page and display a toast to the user
 - [ ] Add question mark symbol next to AFP and TFP headings to make it clear that there is a tooltip available
 - [ ] Get Time On Ice value from official NHL API, calculate effective fan-points per 20mins of ice time
-- [ ] Verify if express in lambda is correctly (not) caching the index.html document
+- [x] ~Verify if express in lambda is correctly (not) caching the index.html document~
 - [ ] Add exponential-delayed retry to email sender
 - [ ] Investigate issue where player headshot images sometimes give 401 error. Make sure frontend responds gracefully when image url is invalid.
-- [ ] Serve frontend with S3 + CloudFront?
+- [x] ~Serve frontend with S3 + CloudFront?~
 - [ ] Create jscalc to estimate cost of website.
 - [ ] Create express middleware which verifies the ID token and extracts user info out of it
 - [ ] Write unit tests. Be sure to save the resulting total value of each optimized lineup to ensure that the algorithm's perfomance will not degrade over time... Will do this once unit tests time comes around.
 - [ ] Come up with a better solution for log level rather than passing a verbose flag through a million functions...
 - [ ] **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
 - [ ] Make better use of SAM framework in python lambda by adding requirements.txt, making `clean-maxflow` and `package-maxflow` scripts obsolete
+- [x] ~Cleanup CloudFormation template (use !Sub keyword lots)~
 
-### Some cost estimation notes:
+### Some cost estimation notes
 
 #### API Gateway
 0$
