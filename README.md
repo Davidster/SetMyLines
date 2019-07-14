@@ -51,6 +51,7 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - [ ] **Clean up code.. make sure indentation is always 2 and NO DARNED SINGLE QUOTES**
 - [ ] Make better use of SAM framework in python lambda by adding requirements.txt, making `clean-maxflow` and `package-maxflow` scripts obsolete
 - [x] ~Cleanup CloudFormation template (use !Sub keyword lots)~
+- [ ] Fix issue where loginCallback is called twice upon fulfilling yahoo redirect signin
 
 ### Some cost estimation notes
 

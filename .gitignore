@@ -2,4 +2,3 @@ node_modules/
 .env
 lambda-invoke-response.json
 packaged-sam.yaml
-backend/services/apiHandler/public
