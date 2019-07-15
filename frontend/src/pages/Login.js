@@ -17,15 +17,16 @@ class Login extends Component {
     }
 
     checkIfAlreadyAuthorized = async () => {
-      // check if we were redirected from Yahoo with an authorization code
-      let params = new URLSearchParams(window.location.search);
-      let code = params.get("code");
-      if(code) {
-        await Api.loginCallback(code);
-      }
       try {
-        await this.props.checkIsLoggedIn();
+        // check if we were redirected from Yahoo with an authorization code
+        let params = new URLSearchParams(window.location.search);
+        let code = params.get("code");
+        if(code) {
+          await Api.loginCallback(code);
+        }
+        await Api.validateToken();
         this.props.history.replace("/");
+        this.props.setSignedIn(true);
       } catch(err) {
         console.log(err);
         console.log("User is not logged in");
@@ -51,7 +52,7 @@ class Login extends Component {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button color="primary" onClick={() => { this.handleLoginClick(this.props); }}>
+            <Button color="primary" onClick={this.handleLoginClick}>
               Sign into Yahoo
             </Button>
           </DialogActions>

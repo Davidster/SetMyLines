@@ -43,9 +43,13 @@ class Routes extends Component {
     };
   }
 
+  setSignedIn = (signedIn) => {
+    this.setState({ signedIn: signedIn });
+  };
+
   checkIsLoggedIn = async () => {
     await Api.validateToken();
-    this.setState({ signedIn: true });
+    this.setSignedIn(true);
   };
 
   componentDidMount() {
@@ -68,7 +72,7 @@ class Routes extends Component {
         <Switch>
           <Route path="/" exact component={MainPage} />
           <Route path="/settings" component={Settings} />
-          <Route path="/login" component={()=><Login checkIsLoggedIn={this.checkIsLoggedIn}/>} />
+          <Route path="/login" component={()=><Login setSignedIn={this.setSignedIn}/>} />
           <Route path="/registerEmail" component={RegisterEmail} />
           <Route path="/verifyEmail" component={VerifyEmail} />
           <Route path="/unsubscribeEmail" component={UnsubscribeEmail} />

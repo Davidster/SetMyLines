@@ -59,16 +59,6 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-// use DEV_TOKEN env var for authentication on localhost
-if(process.env.RUN_LOCAL) {
-  app.use((req, res, next) => {
-    if(process.env.DEV_TOKEN) {
-      req.cookies.accessToken = process.env.DEV_TOKEN;
-    }
-    next();
-  });
-}
-
 app.use("/verifyToken", csrfProtection, verifyTokenRouter);
 app.use("/loginUrl", csrfProtection, loginUrlRouter);
 app.use("/loginCallback", loginCallbackRouter);

@@ -6,7 +6,12 @@ const oauth2 = require(path.join(process.env.LIB_PATH, "yahoo/oauth2"));
 const cookieOptions = require(path.join(process.env.LIB_PATH, "yahoo/cookieOptions"));
 
 router.post("/", asyncMiddleware(async (req, res, next) => {
-  console.log(req.query.code);
+  // use DEV_TOKEN env var for authentication on localhost
+  if(process.env.RUN_LOCAL && process.env.DEV_TOKEN) {
+    res.cookie("accessToken", process.env.DEV_TOKEN, cookieOptions);
+    return res.json({});
+  }
+
   const tokenConfig = {
     code: req.query.code,
     redirect_uri: `https://${process.env.YAHOO_OAUTH_DOMAIN}/login`
