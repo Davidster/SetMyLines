@@ -3,7 +3,7 @@ const rateLimit = require("function-rate-limit");
 const ses = new AWS.SES({ apiVersion: "2010-12-01", region: "us-east-1" });
 const VERIFICATION_TEMPLATE_NAME = "SetMyLinesVerificationEmail";
 
-// https://localhost:3000/verifyEmail?userID=45IPHYEJLPZJF6TIZYNXBIG4NU&verificationCode=6b01225c-729f-48ec-b2df-217f13199225
+// http://localhost:3000/verifyEmail?userID=45IPHYEJLPZJF6TIZYNXBIG4NU&verificationCode=77f6e198-6061-42bf-b215-df0317c597c1&succeeded=true
 
 const createVerificationTemplate = (userID, verificationCode) => {
   const baseUrl = `https://setmylines.com/verifyEmail?userID=${userID}&verificationCode=${verificationCode}`
@@ -20,7 +20,6 @@ const createVerificationTemplate = (userID, verificationCode) => {
         <head></head>
         <body style="font-family:sans-serif;">
           <p>Dear new user,</p>
-          </br>
           <p>Thank you for subscribing to Set My Lines!</p>
           <p>Please visit the following link to verify your email address:</p>
         </body>

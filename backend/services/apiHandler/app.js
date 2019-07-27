@@ -18,6 +18,7 @@ const logoutRouter = require("./routes/logout");
 const teamsRouter = require("./routes/teams");
 const teamRosterRouter = require("./routes/teamRoster");
 const subscriptionsRouter = require("./routes/subscriptions");
+const settingsRouter = require("./routes/settings");
 const emailRouter = require("./routes/email");
 
 // use in-memory cache if running locally to improve development speed
@@ -66,6 +67,7 @@ app.use("/logout", logoutRouter);
 app.use("/teams", csrfProtection, cacheMiddleware(3600), teamsRouter);
 app.use("/teamRoster", csrfProtection, cacheMiddleware(3600), teamRosterRouter);
 app.use("/subscriptions", csrfProtection, subscriptionsRouter);
+app.use("/settings", csrfProtection, settingsRouter);
 app.use("/email", emailRouter);
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));

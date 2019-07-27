@@ -99,25 +99,25 @@ let getSubscriptions = async (userID) => {
   return {};
 };
 
-let putEmail = async (userID, email) => {
+let putEmail = async (userID, emailAddress) => {
   let userItem = await getUserItem(userID);
   if(!userItem) {
     userItem = {
       userID: userID
     };
   }
-  if(userItem.email && userItem.email.address === email) {
-    return userItem.email.isVerified;
+  if(userItem.email && userItem.email.address === emailAddress) {
+    return userItem.email;
   }
   userItem.email = {
-    address: email,
+    address: emailAddress,
     isVerified: false,
     isEnabled: true,
     verificationCode: uuidv4()
   };
   userItem.lastUpdateTime = new Date().toString();
   await putUserItem(userItem);
-  return false;
+  return userItem.email;
 };
 
 let verifyEmail = async (userID, verificationCode) => {

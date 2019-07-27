@@ -8,7 +8,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { withRouter } from "react-router";
 
 
-import * as Api from "../api";
+import Api from "../api";
 
 class Login extends Component {
 

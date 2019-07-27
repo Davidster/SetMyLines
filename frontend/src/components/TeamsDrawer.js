@@ -11,7 +11,7 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemText from "@material-ui/core/ListItemText";
 import LaunchIcon from "@material-ui/icons/Launch";
 
-import * as Api from "../api";
+import Api from "../api";
 
 import "./TeamsDrawer.css";
 
@@ -31,7 +31,7 @@ export default props => (
             className="teamListItemText"
             primary={team.teamName}
             secondary={
-              <Typography color="textPrimary">
+              <Typography variant="body1" color="textPrimary">
                 {team.leagueName}
                 <span className="leagueYearText">{` — ${team.leagueYear}`}</span>
               </Typography>

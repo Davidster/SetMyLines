@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-d
 import { withRouter } from "react-router";
 
 import * as serviceWorker from "./serviceWorker";
-import * as Api from "./api";
+import Api from "./api";
 import LoadingDialog from "./components/LoadingDialog";
 import AppBar from "./components/AppBar";
 import MainPage from "./pages/MainPage";

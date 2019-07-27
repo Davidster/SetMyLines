@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import $ from "jquery";
-import * as Api from "../api";
+import Api from "../api";
 
 class UnsubscribeEmail extends Component {
 
@@ -24,7 +24,7 @@ class UnsubscribeEmail extends Component {
   };
 
   unsubscribeEmail = async () => {
-    let params = new URLSearchParams(this.props.location.search);
+    let params = new URLSearchParams(window.location.search);
     let userID = params.get("userID");
     let emailAddress = params.get("emailAddress");
     let verificationCode = params.get("verificationCode");

@@ -17,105 +17,99 @@ let apiRequest = (options) => {
   });
 };
 
-let getLoginUrl = () => apiRequest({
-  type: "GET",
-  url: "/loginUrl"
-});
-
-let loginCallback = (code) => apiRequest({
-  type: "POST",
-  url: `/loginCallback?code=${code}`
-});
-
-let logout = () => apiRequest({
-  type: "POST",
-  url: "/logout"
-});
-
-let validateToken = () => apiRequest({
-  type: "GET",
-  url: "/verifyToken"
-}).then(tokenValidResponse => {
-  csrfToken = tokenValidResponse.csrfToken;
-  return tokenValidResponse;
-});
-
-let getTeams = () => apiRequest({
-  type: "GET",
-  url: "/teams"
-});
-
-let getTeamRoster = (teamKey, date) => apiRequest({
-  type: "GET",
-  url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
-});
-
-let updateTeamRoster = (teamKey, lineup, date) => apiRequest({
-  type: "PUT",
-  url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`,
-  headers: {
-    "CSRF-Token": csrfToken
-  },
-  data: {
-    lineup: lineup
-  }
-});
-
-let getSubscriptions = () => apiRequest({
-  type: "GET",
-  url: "/subscriptions"
-});
-
-let addSubscription = (teamKey, stat) => apiRequest({
-  type: "POST",
-  url: `/subscriptions`,
-  headers: {
-    "CSRF-Token": csrfToken
-  },
-  data: {
-    teamKey: teamKey,
-    stat: stat
-  }
-});
-
-let deleteSubscription = (teamKey) => apiRequest({
-  type: "DELETE",
-  url: `/subscriptions`,
-  headers: {
-    "CSRF-Token": csrfToken
-  },
-  data: {
-    teamKey: teamKey
-  }
-});
-
-let getEmail = () => apiRequest({
-  type: "GET",
-  url: "/email"
-});
-
-let registerEmail = emailAddress => apiRequest({
-  type: "POST",
-  url: `/email/register`,
-  headers: {
-    "CSRF-Token": csrfToken
-  },
-  data: {
-    email: emailAddress
-  }
-});
-
-export {
-  getTeams,
-  getTeamRoster,
-  updateTeamRoster,
-  validateToken,
-  getSubscriptions,
-  addSubscription,
-  deleteSubscription,
-  getEmail,
-  registerEmail,
-  getLoginUrl,
-  loginCallback,
-  logout
+export default {
+  verifyEmail: (userID, verificationCode) => apiRequest({
+    type: "POST",
+    url: "/email/verify",
+    data: {
+      userID: userID,
+      verificationCode: verificationCode
+    }
+  }),
+  
+  getLoginUrl: () => apiRequest({
+    type: "GET",
+    url: "/loginUrl"
+  }),
+  
+  loginCallback: (code) => apiRequest({
+    type: "POST",
+    url: `/loginCallback?code=${code}`
+  }),
+  
+  logout: () => apiRequest({
+    type: "POST",
+    url: "/logout"
+  }),
+  
+  validateToken: () => apiRequest({
+    type: "GET",
+    url: "/verifyToken"
+  }).then(tokenValidResponse => {
+    csrfToken = tokenValidResponse.csrfToken;
+    return tokenValidResponse;
+  }),
+  
+  getTeams: () => apiRequest({
+    type: "GET",
+    url: "/teams"
+  }),
+  
+  getTeamRoster: (teamKey, date) => apiRequest({
+    type: "GET",
+    url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`
+  }),
+  
+  updateTeamRoster: (teamKey, lineup, date) => apiRequest({
+    type: "PUT",
+    url: `/teamRoster?teamKey=${teamKey}&date=${date.format("YYYY-MM-DD")}`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: {
+      lineup: lineup
+    }
+  }),
+  
+  getSubscriptions: () => apiRequest({
+    type: "GET",
+    url: "/subscriptions"
+  }),
+  
+  addSubscription: (teamKey, stat) => apiRequest({
+    type: "POST",
+    url: `/subscriptions`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: {
+      teamKey: teamKey,
+      stat: stat
+    }
+  }),
+  
+  deleteSubscription: (teamKey) => apiRequest({
+    type: "DELETE",
+    url: `/subscriptions`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: {
+      teamKey: teamKey
+    }
+  }),
+  
+  getSettings: () => apiRequest({
+    type: "GET",
+    url: "/settings"
+  }),
+  
+  updateSettings: (emailAddress) => apiRequest({
+    type: "PUT",
+    url: `/settings`,
+    headers: {
+      "CSRF-Token": csrfToken
+    },
+    data: { emailAddress }
+  })
 };

@@ -7,7 +7,7 @@ import AppBar from "../components/AppBar";
 import TeamsDrawer from "../components/TeamsDrawer";
 import Roster from "../components/Roster";
 import LoadingDialog from "../components/LoadingDialog";
-import * as Api from "../api";
+import Api from "../api";
 
 import "./MainPage.css";
 
@@ -17,7 +17,7 @@ class MainPage extends Component {
 
   constructor(props) {
     super(props);
-    this.teamRosters = {};
+    this.cachedRosters = {};
     this.state = {
       activeTeamKey: undefined,
       teams: [],
@@ -25,7 +25,7 @@ class MainPage extends Component {
       toolbarOpen: true,
       loading: "Loading your teams",
       disableRosterAnimation: false,
-      selectedDate: undefined
+      selectedDate: moment().tz(SERVER_TIME_ZONE)
     };
     Api.getTeams().then(teamsResponse => {
       console.log(teamsResponse);
@@ -49,9 +49,16 @@ class MainPage extends Component {
       date = moment().tz(SERVER_TIME_ZONE);
     }
     try {
-      let roster = await Api.getTeamRoster(teamKey, date);
-      console.log("roster api result:", roster);
-      this.teamRosters[this.state.activeTeamKey] = roster;
+      const teamKeyWithDate = `${date.format("YYYY-MM-DD")}-${teamKey}`;
+      const cachedRoster = this.cachedRosters[teamKeyWithDate];
+      let roster;
+      if(cachedRoster) {
+        roster = this.cachedRosters[teamKeyWithDate];
+      } else {
+        roster = await Api.getTeamRoster(teamKey, date);
+        console.log("roster api result:", roster);
+        this.cachedRosters[teamKeyWithDate] = roster;
+      }
       this.setState({
         roster: roster,
         selectedDate: date,
@@ -70,24 +77,13 @@ class MainPage extends Component {
       disableRosterAnimation: true,
       activeTeamKey: teamKey
     });
-    if(this.teamRosters[teamKey]) {
-      this.setState({
-        roster: this.teamRosters[teamKey]
-      });
+    this.loadTeamRoster(teamKey, this.state.selectedDate).then(() => {
       setTimeout(() => {
         this.setState({
           disableRosterAnimation: false
         });
       }, 1000);
-    } else {
-      this.loadTeamRoster(teamKey, this.state.selectedDate).then(() => {
-        setTimeout(() => {
-          this.setState({
-            disableRosterAnimation: false
-          });
-        }, 1000);
-      });
-    }
+    });
     // Api.getSubscriptions().then(res => {
     //   console.log("getSubscriptions success:", res);
     //   if(!res[teamKey]) {
@@ -137,11 +133,13 @@ class MainPage extends Component {
       <>
         <CssBaseline />
         <AppBar title={selectedTeamName ? selectedTeamName : "Select a team"}
-                //extraButtonText="Settings"
-                onHamburgerClick={this.handleDrawerToggle}
-                onExtraButtonClick={ () => { this.props.history.push("/settings"); }}/>
+                additionalButtons={[{
+                  text: "Settings",
+                  clickHandler: () => { this.props.history.push("/settings"); }
+                }]}
+                onHamburgerClick={this.handleDrawerToggle}/>
         <TeamsDrawer teams={teams} open={toolbarOpen} onTeamClick={this.handleTeamClick}/>
-        <div className={`content ${toolbarOpen ? "shift" : ""}`}>
+        <div className={`content ${toolbarOpen ? "shift" : "unshift"}`}>
           <div className="contentSpacer"></div>
           <Roster roster={roster}
                   date={selectedDate}

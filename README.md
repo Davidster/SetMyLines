@@ -52,6 +52,9 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - [ ] Make better use of SAM framework in python lambda by adding requirements.txt, making `clean-maxflow` and `package-maxflow` scripts obsolete
 - [x] ~Cleanup CloudFormation template (use !Sub keyword lots)~
 - [x] Fix issue where loginCallback is called twice upon fulfilling yahoo redirect signin
+- [ ] If visiting a page while not logged in, should redirect to said page after login is complete
+- [ ] Use fetch instead of jquery for api calls in frontend
+- [ ] Include timestamp in email verification template name and delete template after using it - to avoid race condition of multiple users registering their emails at the same time
 
 ### Some cost estimation notes
 
