@@ -6,7 +6,8 @@ const cloudformation = new AWS.CloudFormation({ apiVersion: "2010-05-15" });
 
 const LIB_PATH = "./lib/common";
 const envVarToCfOutputMap = {
-  USER_INFO_TABLE_NAME: "UserInfoTableName"
+  USER_INFO_TABLE_NAME: "UserInfoTableName",
+  CF_STACK_NAME: "CfStackName"
 };
 
 const setupEnvVars = async () => {
@@ -31,11 +32,13 @@ const setupEnvVars = async () => {
 };
 
 // main
-// TODO: contemplate whether is makes much sense to run these modules simply by calling require().
+// TODO: contemplate whether it makes much sense to run these modules simply by calling require().
 // it is probably better to expose a function and call it in here. Or maybe create a module in
 // backend/lib/common which would allow a run.local file to be placed in the individual services
 // ... please contemplate
 (async () => {
   await setupEnvVars();
   require("./services/apiHandler/app.local");
+  // require("./services/customEmailVerification/lambda");
+  // require("./lib/common/user/emailer");
 })();

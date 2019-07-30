@@ -1,48 +1,33 @@
 const uuidv4 = require("uuid/v4");
 const AWS = require("aws-sdk");
 const ddbConfig = { apiVersion: "2012-08-10", region: "us-east-1" };
-const dynamodb = new AWS.DynamoDB(ddbConfig);
 const documentClient = new AWS.DynamoDB.DocumentClient(ddbConfig);
 const TABLE_NAME = process.env.USER_INFO_TABLE_NAME;
 
 let putUserItem = userItem => {
-  return new Promise((resolve, reject) => {
-    dynamodb.putItem({
-      TableName: TABLE_NAME,
-      Item: AWS.DynamoDB.Converter.marshall(userItem)
-    }, (err, data) => {
-      if (err) { return reject(err); }
-      resolve();
-    });
-  });
+  return documentClient.put({
+    TableName: TABLE_NAME,
+    Item: userItem
+  }).promise();
 };
 
-let getUserItem = userID => {
-  return new Promise((resolve, reject) => {
-    dynamodb.getItem({
-      TableName: TABLE_NAME,
-      Key: AWS.DynamoDB.Converter.marshall({
-        userID: userID
-      })
-    }, (err, data) => {
-      if (err) { return reject(err); }
-      resolve(data.Item ? AWS.DynamoDB.Converter.unmarshall(data.Item) : undefined);
-    });
-  });
+let getUserItem = async userID => {
+  const { Item } = await documentClient.get({
+    TableName: TABLE_NAME,
+    Key: {
+      userID: userID
+    }
+  }).promise();
+  return Item;
 };
 
 let deleteUserItem = userID => {
-  return new Promise((resolve, reject) => {
-    dynamodb.deleteItem({
-      TableName: TABLE_NAME,
-      Key: AWS.DynamoDB.Converter.marshall({
-        userID: userID
-      })
-    }, (err, data) => {
-      if (err) { return reject(err); }
-      resolve();
-    });
-  });
+  return documentClient.delete({
+    TableName: TABLE_NAME,
+    Key: {
+      userID: userID
+    }
+  }).promise();
 };
 
 let getAllUsers = async () => {
@@ -111,30 +96,14 @@ let putEmail = async (userID, emailAddress) => {
   }
   userItem.email = {
     address: emailAddress,
-    isVerified: false,
-    isEnabled: true,
-    verificationCode: uuidv4()
+    isEnabled: true
   };
   userItem.lastUpdateTime = new Date().toString();
   await putUserItem(userItem);
   return userItem.email;
 };
 
-let verifyEmail = async (userID, verificationCode) => {
-  let userItem = await getUserItem(userID);
-  if(!userItem || !userItem.email) {
-    return false;
-  }
-  if(userItem.email.verificationCode !== verificationCode) {
-    return false;
-  }
-  userItem.email.isVerified = true;
-  userItem.lastUpdateTime = new Date().toString();
-  await putUserItem(userItem);
-  return true;
-};
-
-let deleteEmail = async (userID, verificationCode) => {
+let deleteEmail = async (userID) => {
   let userItem = await getUserItem(userID);
   if(!userItem || !userItem.email) {
     return;
@@ -146,20 +115,20 @@ let deleteEmail = async (userID, verificationCode) => {
 
 let enableEmail = async (userID, enable) => {
   let userItem = await getUserItem(userID);
-  if(!userItem || !userItem.email) {
-    return;
+  if(!userItem || !userItem.email || userItem.email.isEnabled === enable) {
+    return userItem.email;
   }
   userItem.email.isEnabled = enable;
   userItem.lastUpdateTime = new Date().toString();
   await putUserItem(userItem);
+  return userItem.email;
 };
 
 let getEmail = async userID => {
   let userItem = await getUserItem(userID);
-  if(userItem && userItem.email) {
+  if(userItem) {
     return userItem.email;
   }
-  return {};
 };
 
 module.exports.getAllUsers = getAllUsers;
@@ -168,7 +137,6 @@ module.exports.putSubscription = putSubscription;
 module.exports.getSubscriptions = getSubscriptions;
 module.exports.deleteSubscription = deleteSubscription;
 module.exports.putEmail = putEmail;
-module.exports.verifyEmail = verifyEmail;
 module.exports.deleteEmail = deleteEmail;
 module.exports.getEmail = getEmail;
 module.exports.enableEmail = enableEmail;

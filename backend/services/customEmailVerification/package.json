@@ -1,0 +1,8 @@
+{
+  "name": "setmylines-custom-email-verification-lambda",
+  "version": "1.0.0",
+  "main": "lambda.js",
+  "dependencies": {
+    "cfn-lambda": "^4.0.0"
+  }
+}

@@ -21,15 +21,4 @@ router.post("/unsubscribe", asyncMiddleware(async (req, res, next) => {
   }
 }));
 
-router.post("/verify", asyncMiddleware(async (req, res, next) => {
-  if(!req.body.userID || !req.body.verificationCode) {
-    return res.status(400).send();
-  }
-  let verified = await userDAO.verifyEmail(req.body.userID, req.body.verificationCode);
-  if(!verified) {
-    return res.status(400).send();
-  }
-  res.json({});
-}));
-
 module.exports = router;

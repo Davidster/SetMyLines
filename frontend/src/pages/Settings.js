@@ -24,17 +24,16 @@ class Settings extends Component {
     super(props);
     this.state = {
       loading: "Loading settings",
-      emailAddress: "",
-      emailVerified: undefined,
-      emailInputIsValid: true,
-      subscriptionMap: undefined,
-      hasUnsavedChanges: false
+      currentEmailAddress: "",
+      newEmailAddress: "",
+      newEmailAddressValid: true,
+      subscriptionMap: undefined
     };
     this.loadSettings();
   }
 
   componentDidUpdate = () => {
-    if(this.state.hasUnsavedChanges) {
+    if(this.findUnsavedChanges()) {
       window.onbeforeunload = () => true;
     } else {
       window.onbeforeunload = undefined;
@@ -42,10 +41,11 @@ class Settings extends Component {
   };
 
   loadSettings = async () => {
-    const { email: { address, isVerified }, subscriptionMap } = await Api.getSettings();
+    const { email: { address, isVerified } = {}, subscriptionMap } = await Api.getSettings();
     this.setState({
       loading: undefined,
-      emailAddress: address || "",
+      currentEmailAddress: address || "",
+      newEmailAddress: address || "",
       subscriptionMap: subscriptionMap,
       emailFieldLabel: this.getEmailFieldLabel(!!address, isVerified)
     });
@@ -62,37 +62,38 @@ class Settings extends Component {
 
   handleEmailChange = ({ target: { value: email } }) => {
     this.setState({
-      emailAddress: email,
-      emailInputIsValid: !validate({from: email}, {from: {email: true}}),
-      hasUnsavedChanges: true
+      newEmailAddress: email,
+      newEmailAddressValid: (email === "") || !validate({from: email}, {from: {email: true}})
     });
   };
 
   handleSaveClick = async () => {
-    console.log("Should update settings with: ", {
-      emailAddress: this.state.emailAddress
-    });
     this.setState({
       loading: "Updating settings"
     });
-    const { email: { address, isVerified }, subscriptionMap } = await Api.updateSettings(this.state.emailAddress);
+    const { email: { address, isVerified } = {}, subscriptionMap } = await Api.updateSettings(this.state.newEmailAddress);
     this.setState({
       loading: undefined,
-      emailAddress: address || "",
+      currentEmailAddress: address || "",
+      newEmailAddress: address || "",
       subscriptionMap: subscriptionMap,
       emailFieldLabel: this.getEmailFieldLabel(!!address, isVerified)
     });
-    
+  };
+
+  findUnsavedChanges = () => {
+    const { currentEmailAddress, newEmailAddress } = this.state;
+    return currentEmailAddress !== newEmailAddress;
   };
 
   render() {
-    const { loading, 
-            emailAddress, 
-            emailVerified,
+    const { loading,
+            currentEmailAddress,
+            newEmailAddress,
             emailFieldLabel,
-            emailInputIsValid,
-            subscriptionMap, 
-            hasUnsavedChanges } = this.state;
+            newEmailAddressValid,
+            subscriptionMap } = this.state;
+    const hasUnsavedChanges = this.findUnsavedChanges();
     return (
       <>
         <Prompt 
@@ -101,7 +102,7 @@ class Settings extends Component {
         <AppBar title="Settings"
                 additionalButtons={[{
                   text: "Save",
-                  disabled: !hasUnsavedChanges || !emailInputIsValid,
+                  disabled: !hasUnsavedChanges || !newEmailAddressValid,
                   clickHandler: this.handleSaveClick
                 },{
                   text: "Home",
@@ -110,14 +111,14 @@ class Settings extends Component {
         {loading ? <LoadingDialog text={loading}/> : (
           <div className="content">
             <div className="contentSpacer"></div>
-            <Paper className="paper">
+            <Paper className="section">
               <Typography variant="subtitle1">{emailFieldLabel}</Typography>
-              <TextField value={emailAddress}
+              <TextField value={newEmailAddress}
                          disabled={false}
                          onChange={this.handleEmailChange}
-                         error={!emailInputIsValid}
+                         error={!newEmailAddressValid}
                          label="Email"
-                         helperText={emailInputIsValid ? "" : "Email format is incorrect"}
+                         helperText={newEmailAddressValid ? "" : "Email format is incorrect"}
                          type="email"
                          name="email"
                          autoComplete="email"

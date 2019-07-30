@@ -15,6 +15,7 @@ Globals:
         USER_INFO_TABLE_NAME: !Ref SetMyLinesUserInfo
         LIB_PATH: "/opt/common"
         SITE_DOMAIN: !GetAtt CloudFrontDistribution.DomainName
+        CF_STACK_NAME: !Sub ${AWS::StackName}
 
 Resources:
   StaticClientBucket:
@@ -126,6 +127,14 @@ Resources:
             - dynamodb:DeleteItem
             - dynamodb:PutItem
             Resource: !GetAtt SetMyLinesUserInfo.Arn
+      - PolicyName: manageSES
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - ses:*
+            Resource: "*"
 
   MaxFlowLambdaRole:
     Type: AWS::IAM::Role
@@ -266,6 +275,18 @@ Resources:
         Variables:
           MAXFLOW_LAMBDA_NAME: !Ref MaxFlowMinCostHandler
 
+  CustomEmailVerificationHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./backend/services/customEmailVerification/
+      Role: !GetAtt SetMyLinesLambdaRole.Arn
+
+  CustomEmailVerification:
+    Type: Custom::LoadLambda
+    Properties:
+      ServiceToken: !GetAtt CustomEmailVerificationHandler.Arn
+      DummyProp: UsedForUpdates
+
   SubscriptionTrigger:
     Type: AWS::Events::Rule
     Properties:
@@ -320,4 +341,8 @@ Outputs:
   UserInfoTableName:
     Description: Envriroment variable USER_INFO_TABLE_NAME
     Value: !Ref SetMyLinesUserInfo
+
+  CfStackName:
+    Description: Envriroment variable CF_STACK_NAME
+    Value: !Sub ${AWS::StackName}
   

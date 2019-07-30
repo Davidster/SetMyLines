@@ -1,85 +1,79 @@
 const AWS = require("aws-sdk");
 const rateLimit = require("function-rate-limit");
+const { URL } = require("url");
 const ses = new AWS.SES({ apiVersion: "2010-12-01", region: "us-east-1" });
-const VERIFICATION_TEMPLATE_NAME = "SetMyLinesVerificationEmail";
 
 // http://localhost:3000/verifyEmail?userID=45IPHYEJLPZJF6TIZYNXBIG4NU&verificationCode=77f6e198-6061-42bf-b215-df0317c597c1&succeeded=true
 
-const createVerificationTemplate = (userID, verificationCode) => {
-  const baseUrl = `https://setmylines.com/verifyEmail?userID=${userID}&verificationCode=${verificationCode}`
-  const successUrl = new URL(`${baseUrl}&succeeded=true`).href;
-  const failureUrl = new URL(`${baseUrl}&succeeded=false`).href;
-  const params = {
-    SuccessRedirectionURL: successUrl,
-    FailureRedirectionURL: failureUrl,
-    FromEmailAddress: "noreply@setmylines.com",
-    TemplateName: VERIFICATION_TEMPLATE_NAME,
-    TemplateSubject: "Set My Lines email verification",
-    TemplateContent: `
-      <html>
-        <head></head>
-        <body style="font-family:sans-serif;">
-          <p>Dear new user,</p>
-          <p>Thank you for subscribing to Set My Lines!</p>
-          <p>Please visit the following link to verify your email address:</p>
-        </body>
-      </html>`
-  };
-  return new Promise((resolve, reject) => {
-    ses.updateCustomVerificationEmailTemplate(params, function(err, data) {
-      if(err) { return reject(err); }
-      resolve(data);
-    });
-  });
+const VERIFICATION_TEMPLATE_NAME = `${process.env.CF_STACK_NAME}-VerificationEmail`;
+const VERIFICATION_REDIRECT_URL = "https://setmylines.com/verifyEmail";
+
+// NOTE: in order to update this template, the cloudformation resource (CustomEmailVerification) should be updated
+// This can be triggered by updating the value of any of properties on the resource
+const VERIFICATION_TEMPLATE_PARAMS = {
+  TemplateName: VERIFICATION_TEMPLATE_NAME,
+  SuccessRedirectionURL: new URL(`${VERIFICATION_REDIRECT_URL}?succeeded=true`).href,
+  FailureRedirectionURL: new URL(`${VERIFICATION_REDIRECT_URL}?succeeded=false`).href,
+  FromEmailAddress: "noreply@setmylines.com",
+  TemplateSubject: "Set My Lines email verification",
+  TemplateContent: `
+    <html>
+      <head></head>
+      <body style="font-family:sans-serif;">
+        <p>Dear new user,</p>
+        </br>
+        <p>Thank you for subscribing to Set My Lines!</p>
+        <p>Please visit the following link to verify your email address:</p>
+      </body>
+    </html>`
 };
 
-const sendVerificationEmail = (emailAddress) => {
-  const params = {
+const isEmailAddressVerified = async emailAddress => {
+  const { 
+    VerificationAttributes: { 
+      [emailAddress]: verificationAttributes
+    } 
+  } = await ses.getIdentityVerificationAttributes({ Identities: [emailAddress] }).promise();
+  if(!verificationAttributes) {
+    return false;
+  }
+  return verificationAttributes.VerificationStatus === "Success";
+};
+
+const createVerificationTemplate = () => (
+  ses.createCustomVerificationEmailTemplate(VERIFICATION_TEMPLATE_PARAMS).promise()
+);
+
+const updateVerificationTemplate = () => (
+  ses.updateCustomVerificationEmailTemplate(VERIFICATION_TEMPLATE_PARAMS).promise()
+);
+
+const deleteVerificationTemplate = () => (
+  ses.deleteCustomVerificationEmailTemplate({ TemplateName: VERIFICATION_TEMPLATE_NAME }).promise()
+);
+
+const emailVerificationLink = (emailAddress) => (
+  ses.sendCustomVerificationEmail({
     EmailAddress: emailAddress,
     TemplateName: VERIFICATION_TEMPLATE_NAME
-  };
-  return new Promise((resolve, reject) => {
-    ses.sendCustomVerificationEmail(params, function(err, data) {
-      if(err) { return reject(err); }
-      resolve(data);
-    });
-  });
-};
-
-const emailVerificationLink = async (emailAddress, userID, verificationCode) => {
-  console.log(`should send link with ${userID} and ${verificationCode} to ${emailAddress}`);
-  try {
-    let tempalteUpdateResponse = await createVerificationTemplate(userID, verificationCode);
-    let verficationSendResponse = await sendVerificationEmail(emailAddress);
-  } catch(err) {
-    console.log("error sending verification email");
-  }
-};
+  }).promise()
+);
 
 // TODO: add exponential-delayed retry
 const sendEmailNotifications = async (allUserRosterUpdateResults) => {
   try {
-    let emaiSendResults = await Promise.all(allUserRosterUpdateResults.filter(userRosterUpdateResults=>
+    let emailSendResults = await Promise.all(allUserRosterUpdateResults.filter(userRosterUpdateResults=>
       userRosterUpdateResults.user.email &&
       userRosterUpdateResults.user.email.isEnabled &&
       userRosterUpdateResults.user.email.isVerified
     ).map(
-      userRosterUpdateResults=>sendEmailNotificationPromise(userRosterUpdateResults)
+      userRosterUpdateResults=>sendEmailNotification(userRosterUpdateResults)
     ));
-    console.log("emaiSendResults:", emaiSendResults);
+    console.log("emailSendResults:", emailSendResults);
   } catch(err) {
     console.log("error sending emails:", err);
   }
 };
-
-const sendEmailNotificationPromise = (userRosterUpdateResults) => {
-  return new Promise((resolve, reject) => {
-    sendEmailNotification(userRosterUpdateResults, (err, data) => {
-      if (err) { return reject(err); }
-      resolve(data);
-    });
-  });
-}
 
 const sendEmailNotification = rateLimit(1, 3000, (userRosterUpdateResults, cb) => {
   const { user, rosterUpdateResults, teams } = userRosterUpdateResults;
@@ -165,10 +159,7 @@ const sendEmailNotification = rateLimit(1, 3000, (userRosterUpdateResults, cb) =
     },
     Source: "noreply@setmylines.com"
   };
-  ses.sendEmail(params, (err, data) => {
-    if (err) { return cb(err); }
-    cb(undefined, data);
-  });
+  return ses.sendEmail(params).promise();
 });
 
 let formatPositionText = position => {
@@ -195,3 +186,7 @@ let formatDiffPercentage = diff => {
 
 module.exports.emailVerificationLink = emailVerificationLink;
 module.exports.sendEmailNotifications = sendEmailNotifications;
+module.exports.createVerificationTemplate = createVerificationTemplate;
+module.exports.updateVerificationTemplate = updateVerificationTemplate;
+module.exports.deleteVerificationTemplate = deleteVerificationTemplate;
+module.exports.isEmailAddressVerified = isEmailAddressVerified;

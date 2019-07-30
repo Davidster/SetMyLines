@@ -11,7 +11,6 @@ import AppBar from "./components/AppBar";
 import MainPage from "./pages/MainPage";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
-import RegisterEmail from "./pages/RegisterEmail";
 import VerifyEmail from "./pages/VerifyEmail";
 import UnsubscribeEmail from "./pages/UnsubscribeEmail";
 
@@ -73,7 +72,6 @@ class Routes extends Component {
           <Route path="/" exact component={MainPage} />
           <Route path="/settings" component={Settings} />
           <Route path="/login" component={()=><Login setSignedIn={this.setSignedIn}/>} />
-          <Route path="/registerEmail" component={RegisterEmail} />
           <Route path="/verifyEmail" component={VerifyEmail} />
           <Route path="/unsubscribeEmail" component={UnsubscribeEmail} />
           <Route render={() => <Redirect to="/login"/>}/>
