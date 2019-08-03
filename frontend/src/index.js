@@ -47,7 +47,7 @@ class Routes extends Component {
   };
 
   checkIsLoggedIn = async () => {
-    await Api.validateToken();
+    await Api.verifyToken();
     this.setSignedIn(true);
   };
 

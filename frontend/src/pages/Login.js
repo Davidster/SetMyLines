@@ -24,7 +24,7 @@ class Login extends Component {
         if(code) {
           await Api.loginCallback(code);
         }
-        await Api.validateToken();
+        await Api.verifyToken();
         this.props.history.replace("/");
         this.props.setSignedIn(true);
       } catch(err) {
