@@ -138,7 +138,7 @@ class MainPage extends Component {
                   clickHandler: () => { this.props.history.push("/settings"); }
                 }]}
                 onHamburgerClick={this.handleDrawerToggle}/>
-        <TeamsDrawer teams={teams} open={toolbarOpen} onTeamClick={this.handleTeamClick}/>
+        <TeamsDrawer teams={teams} open={toolbarOpen} onTeamClick={this.handleTeamClick} activeTeamKey={activeTeamKey}/>
         <div className={`content ${toolbarOpen ? "shift" : "unshift"}`}>
           <div className="contentSpacer"></div>
           <Roster roster={roster}

@@ -26,15 +26,17 @@ let formatDiffPercentage = diff => {
 };
 
 export default props => {
-  const { lineup, aggregateStatCategories } = props;
+  const { originalLineup, lineup, aggregateStatCategories } = props;
   return (
     <ExpansionPanel className="statTotalsExpansionPanel">
       <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography className="statTotalsHeading">Roster summary</Typography>
+        <Typography className="statTotalsHeading">Roster stat totals</Typography>
         <Typography className="statTotalsSecHeading">
           {aggregateStatCategories.map(category => (
-            `${category.prettyNameShort}: ${lineup.statTotals[category.name].total.value.toFixed(2)}`
-          )).join(", ")}
+            `${category.prettyNameShort}: ` + 
+            (originalLineup ? `${originalLineup.statTotals[category.name].total.value.toFixed(2)} => ` : "") +
+            `${lineup.statTotals[category.name].total.value.toFixed(2)}`
+          )).join("\n")}
         </Typography>
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className="statTotalsExpansionDetails">
@@ -47,7 +49,9 @@ export default props => {
           let totalPoints = statTotal.total.value;
           let totalDiff = formatDiffPercentage(statTotal.total.diff);
           return (<div key={i}>
-            <Typography variant="h6" gutterBottom>{category.name}: {totalPoints.toFixed(2)} ({totalDiff})</Typography>
+            <Typography variant="h6" gutterBottom>
+              {category.descriptiveName}: {originalLineup ? `${originalLineup.statTotals[category.name].total.value.toFixed(2)} => ` : ""}{totalPoints.toFixed(2)} ({totalDiff})
+            </Typography>
             <Typography gutterBottom>
               - {healthyPoints.toFixed(2)} ({healthyDiff}) from healthy players
             </Typography>

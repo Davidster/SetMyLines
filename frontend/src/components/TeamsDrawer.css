@@ -12,6 +12,19 @@
   min-height: 64px;
 }
 
+#root .drawer .teamListItem.selected {
+  border-right: 4px solid #6001d2;
+  /* background-color: rgba(0, 0, 0, 0.08); */
+  /* background-color: rgba(96, 1, 210, 0.08);
+  background-color: rgba(1, 121, 255, 0.08);
+  background-color: rgba(152, 68, 255, 0.08); */
+}
+
+#root .drawer .teamListItem.disabled .teamListItemAvatar,
+#root .drawer .teamListItem.disabled .teamListItemText {
+  opacity: 0.5;
+}
+
 #root .drawer .teamListItemText {
   padding-right: 0;
 }

@@ -53,10 +53,11 @@ At the time of writing this, the site cannot make any changes to your Yahoo acco
 - [x] ~Cleanup CloudFormation template (use !Sub keyword lots)~
 - [x] ~Fix issue where loginCallback is called twice upon fulfilling yahoo redirect signin~
 - [ ] If visiting a page while not logged in, should redirect to said page after login is complete
-- [x] Use fetch instead of jquery for api calls in frontend
+- [x] ~Use fetch instead of jquery for api calls in frontend~
 - [x] ~Don't store user verification boolean in dynamodb. Instead, use SES call to see if email is verified.~
 - [x] ~Remove isVerified and verificationCode from user email DB~
 - [ ] Add "resend verification email" button to settings page
+- [ ] If the user has not registered an email, show a snackbar that tells them to go to the settings page to set an email
 
 ### Some cost estimation notes
 

@@ -12,8 +12,10 @@ module.exports.parseGameSettings = ($gsDoc) => {
   return statIDMap;
 };
 
+// TODO: don't use pass by reference
 module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) => {
   let gameCode = $lsDoc("game_code").first().text();
+  let scoringType = $lsDoc("scoring_type").first().text();
   let $statModifiers = $lsDoc("stat_modifiers stat");
   $lsDoc("stat_categories stat").each((i, statCategory) => {
     let $statCategory = $lsDoc(statCategory);
@@ -35,7 +37,10 @@ module.exports.parseLeagueSettings = ($lsDoc, statIDMap, positionCapacityMap) =>
     let $rosterPosition = $lsDoc(rosterPosition);
     positionCapacityMap[$rosterPosition.find("position").text()] = parseInt($rosterPosition.find("count").text());
   });
-  return gameCode;
+  return { 
+    gameCode,
+    scoringType
+  };
 };
 
 module.exports.parseTeamRoster = ($trDoc) => {

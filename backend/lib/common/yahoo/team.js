@@ -5,7 +5,7 @@ module.exports.parseTeamDoc = ($teamDoc) => {
       let $league = $teamDoc(league);
       let leagueKey = $league.find("league_key").text();
       let leagueName = $league.find("name").first().text();
-      let leagueUrl = $league.find("url").text();
+      let leagueUrl = $league.find("url").first().text();
       let leagueYear = $league.find("season").text();
       let leagueGameCode = $league.find("game_code").text();
       $league.find("team").each((i, team) => {

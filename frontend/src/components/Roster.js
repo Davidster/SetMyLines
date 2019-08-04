@@ -58,9 +58,7 @@ class RosterView extends Component {
                       className="datePicker"/>
         </MuiPickersUtilsProvider>
         <FormControl className="formControl">
-          <InputLabel shrink htmlFor="optimizationTypeLabel">
-            Stat
-          </InputLabel>
+          <InputLabel shrink htmlFor="optimizationTypeLabel">Stat</InputLabel>
           <Select
             value={optimizationType}
             onChange={this.handleOptimizationTypeClick}
@@ -75,8 +73,13 @@ class RosterView extends Component {
           </Select>
           <FormHelperText>Select stat to optimize against</FormHelperText>
         </FormControl>
+        <Button color="inherit" 
+                onClick={() => { console.log("Should open subscription configuration dialog"); }}>
+          Automatically set my lines
+        </Button>
         {/*<Button onClick={() => { onApplyClick(chosenLineup, playerInfoMap, date); }}>Apply</Button>*/}
         <RosterStatsPanel lineup={chosenLineup}
+                          originalLineup={optimizationType !== "" ? originalLineup : undefined}
                           aggregateStatCategories={aggregateStatCategories}/>
         <RosterTable lineup={chosenLineup}
                      playerInfoMap={playerInfoMap}

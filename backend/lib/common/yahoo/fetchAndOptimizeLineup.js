@@ -21,11 +21,13 @@ const DAILY_SCHEDULE_URL = `https://api.seatgeek.com/2/events?` + [
 const aggregateStatCategories = [
   {
     name: "averageFanPoints",
-    prettyName: "Average fan points per game",
+    descriptiveName: "Average fan points per game",
+    prettyName: "Average fan points",
     prettyNameShort: "AFP"
   },
   {
     name: "totalFanPoints",
+    descriptiveName: "Total fan points",
     prettyName: "Total fan points",
     prettyNameShort: "TFP"
   }
@@ -157,7 +159,7 @@ module.exports.fetchAndOptimizeLineup = async (teamKey, date, accessToken, expre
     statIDMap = parseGameSettings(requests[2]);
     let positionCapacityMap = {};
     // this function mutates the statIDMap and positionCapacityMap objects
-    let gameCode = parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
+    let { gameCode } = parseLeagueSettings(requests[3], statIDMap, positionCapacityMap);
     let allPlayerInfo = parsePlayerStats(requests[0], playerInfoSub, statIDMap, dailyGameMap[gameCode]);
 
     // optimize linuep against some stat categories
