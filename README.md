@@ -161,18 +161,15 @@ Response:
 
 ### Node.js
 
-See [nvm docs](https://github.com/creationix/nvm)
-
-```
-cd expressLambda
-npm install
-```
+Run npm install in all source folders containing a package.json
 
 ### Python
 
 - Must use python version 3.6 when deploying to lambda
 
-```
-sudo apt install python3 python3-pip python3-dev python3-wheel python3-setuptools python3-six python3-venv
+```bash
+# On Ubuntu:
+# sudo apt install python3 python3-pip python3-dev python3-wheel python3-setuptools python3-six python3-venv
+
 python3 -m pip install -U --user ortools
 ```
