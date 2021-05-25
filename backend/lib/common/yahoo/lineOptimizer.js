@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 const lambda = new AWS.Lambda({ apiVersion: "2015-03-31", region: "us-east-1" });
 const path = require("path");
 const { exec } = require("child_process");
-const MFMC_SCRIPT_PATH = path.resolve(__dirname, "../../../services/maxFlow/lambda.py");
+const MFMC_SCRIPT_PATH = path.resolve(__dirname, "../../../services/maxFlow/lambda_function.py");
 
 /*
   valueAttribute is the attribute on the player object that we wish to optimize in maxflow,

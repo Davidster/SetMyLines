@@ -168,7 +168,9 @@ cd expressLambda
 npm install
 ```
 
-### Python 3
+### Python
+
+- Must use python version 3.6 when deploying to lambda
 
 ```
 sudo apt install python3 python3-pip python3-dev python3-wheel python3-setuptools python3-six python3-venv

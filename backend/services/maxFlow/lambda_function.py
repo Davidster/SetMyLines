@@ -12,15 +12,16 @@ def main():
     parser.add_argument('input')
     args = parser.parse_args()
     input = json.loads(args.input)
-    out = handler(input, None, False, False)
+    out = lambda_handler(input, None, False, False)
+    # lambda_handler(None, None, True, True)
 
-def handler(input, context, debug = True, verbose = False):
+def lambda_handler(input, context, debug = True, verbose = False):
   """Solves the maxFlowMinCost problem in the context of nhl players getting assigned to an active roster"""
 
-   # debug = True
-   # verbose = True
-   # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
-   # input = json.loads(inputString)
+  # debug = True
+  # verbose = True
+  # inputString = '{"players":[{"name":"Mark Scheifele","posList":["C"],"value":17.34603174603175},{"name":"Sebastian Aho","posList":["C","LW","RW"],"value":16.844444444444445},{"name":"Ryan O\'Reilly","posList":["C"],"value":16.69047619047619},{"name":"Bo Horvat","posList":["C"],"value":15.628124999999999},{"name":"Elias Pettersson","posList":["C"],"value":14.558490566037737},{"name":"Sean Monahan","posList":["C"],"value":14.490625},{"name":"Mark Stone","posList":["RW"],"value":14.069999999999999},{"name":"Mitchell Marner","posList":["C","RW"],"value":13.612698412698412},{"name":"Micheal Ferland","posList":["LW","RW"],"value":11.566666666666665},{"name":"Tyler Johnson","posList":["C","LW","RW"],"value":9.70483870967742}],"positions":["LW","C","RW"],"positionCapacityMap":{"LW":3,"BN":13,"D":6,"G":2,"C":3,"RW":3}}'
+  # input = json.loads(inputString)
 
   if(debug):
       print("Received input:")

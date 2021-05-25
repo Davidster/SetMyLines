@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: Serverless Express Application/API powered by API Gateway and Lambda
 Globals:
   Function:
-    Runtime: nodejs8.10
+    Runtime: nodejs12.x
     Timeout: 30
     Handler: lambda.handler
     MemorySize: 1024
@@ -264,6 +264,7 @@ Resources:
       CodeUri: ./backend/services/maxFlow/lambda.zip
       Role: !GetAtt MaxFlowLambdaRole.Arn
       Runtime: python3.6
+      Handler: lambda_function.lambda_handler
 
   SubscriptionHandler:
     Type: AWS::Serverless::Function

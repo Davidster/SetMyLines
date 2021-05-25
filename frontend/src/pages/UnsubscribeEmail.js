@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import $ from "jquery";
+// import $ from "jquery";
+
 import Api from "../api";
 
 class UnsubscribeEmail extends Component {
@@ -12,16 +13,16 @@ class UnsubscribeEmail extends Component {
     console.log("in UnsibscribeEmail");
   }
 
-  apiRequest = (options) => {
-    return new Promise((resolve, reject) => {
-      $.ajax(options).done((data) => {
-        resolve(data);
-      }).catch((err) => {
-        console.log("request error", err);
-        reject(err);
-      });
-    });
-  };
+  // apiRequest = (options) => {
+  //   return new Promise((resolve, reject) => {
+  //     $.ajax(options).done((data) => {
+  //       resolve(data);
+  //     }).catch((err) => {
+  //       console.log("request error", err);
+  //       reject(err);
+  //     });
+  //   });
+  // };
 
   unsubscribeEmail = async () => {
     let params = new URLSearchParams(window.location.search);
@@ -36,16 +37,16 @@ class UnsubscribeEmail extends Component {
     console.log("verificationCode:", verificationCode);
     console.log("emailAddress:", emailAddress);
     try {
-      let unsubscribeEmailResponse = await this.apiRequest({
-        type: "POST",
-        url: `/api/email/enable`,
-        data: {
-          userID: userID,
-          verificationCode: verificationCode,
-          enable: false
-        }
-      });
-      console.log("Success unsubscribing email:", unsubscribeEmailResponse);
+      // let unsubscribeEmailResponse = await this.apiRequest({
+      //   type: "POST",
+      //   url: `/api/email/enable`,
+      //   data: {
+      //     userID: userID,
+      //     verificationCode: verificationCode,
+      //     enable: false
+      //   }
+      // });
+      // console.log("Success unsubscribing email:", unsubscribeEmailResponse);
       this.setState({
         msg: "Subscription removal success"
       });
