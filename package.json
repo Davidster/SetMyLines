@@ -31,6 +31,6 @@
     "url": "git+https://github.com/Davidster/yahoo-fantasy-automation.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.493.0"
+    "aws-sdk": "^2.814.0"
   }
 }
