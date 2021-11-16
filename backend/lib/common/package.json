@@ -2,7 +2,7 @@
   "name": "setmylines-shared-dependencies",
   "version": "1.0.0",
   "dependencies": {
-    "aws-sdk": "^2.428.0",
+    "aws-sdk": "^2.814.0",
     "cheerio": "^1.0.0-rc.2",
     "dotenv": "^7.0.0",
     "function-rate-limit": "^1.1.0",
